@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+
+    {% block title %}{{company.name}}{% endblock title %}
+{% block content %}
+
+<style>
+    .container{
+        display: grid;
+        grid-template-columns: 1fr 3fr 1fr;
+    }
+    
+</style>
+
+<div class='container'>
+    <div>
+        <div>
+            <img src='{{profile.getlogo}}'style = "width:100px ;height:100px ;border-radius: 500px;"/>
+        </div>
+        
+        <div>
+            {% if workers.count > 0 %}
+                {% for worker in workers  %}
+                {% comment %} <p><a href="{% url 'user-dashboard' worker.user.id %}">{{worker.user.username}}</a></p> {% endcomment %}
+                {% endfor %}
+            {% endif %}
+        </div>
+    </div>
+
+    <div>
+        <div>
+            <h2>{{company.name}}</h2><small></small>
+            <p>Owner: {{company.owner}}</p>
+            <p>Description : {{company.description}}</p>
+            <p>Website : <a href="{{company.website}}">{{company.website}}</a></p><hr>
+        </div>
+        <div>
+            {% for project in projects %}
+                <h5>{{project.name}}</h5>
+                {% if project.progress > 0 %}
+                    <p>{{project.progress}}%</p>
+                {% else %}
+                    <p>0%</p>
+                {% endif %}
+                {% if project.due_in %}
+                    <p>Due in : {{project.due_in}} {% if project.due_in > 1 %}days {% else %}day{% endif %}</p>
+                {%elif project.due_in == 0%}
+                    <p>Project deadline is today</p>
+                {% else %}
+                    <p>You did not set a deadline</p>
+                {% endif %}
+            {% endfor %}
+        </div>
+    </div>
+
+</div>
+
+{% endblock content %}

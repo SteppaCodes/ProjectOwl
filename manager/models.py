@@ -34,6 +34,14 @@ class Company(models.Model):
     updated = models.DateTimeField(auto_now=True)
     created = models.DateTimeField(auto_now_add=True)
 
+    @property
+    def getlogo(self):
+        try:
+            url = self.logo.url
+        except:
+            url = ''
+        return url
+
     def __str__(self):
         return self.name
     
