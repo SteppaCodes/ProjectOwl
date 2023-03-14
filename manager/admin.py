@@ -2,8 +2,6 @@ from django.contrib import admin
 from .models import Project, MileStone, Team, Worker, Company, Task,Activity
 from users.models import CostumUser
 
-# Register your models here.
-
 # class TeamModelAdmin(admin.ModelAdmin):
 #     def render_change_form(self, request, context,*args, **kwargs):
 #         context['adminform'].form.fields['workers'].queryset  = CostumUser.objects.filter(in_company=True)
@@ -17,7 +15,7 @@ from users.models import CostumUser
 
 admin.site.register(Project)
 admin.site.register(MileStone)
-#admin.site.register(Department, DepartmentModelAdmin)
+# admin.site.register(Team, TeamModelAdmin)
 admin.site.register(Worker)
 admin.site.register(Company)
 admin.site.register(Task)

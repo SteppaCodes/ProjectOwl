@@ -1,0 +1,22 @@
+{% load static %}
+
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        {% comment %} <link rel="stylesheet" href="{% static 'css/style.css' %}" /> {% endcomment %}
+        <title>ProjectHelper | {% block title %}{% endblock title %}</title>
+    </head>
+    <body>
+
+        {% for message in messages %}
+        <h4>{{message}}</h4>
+        {% endfor %}
+
+        {% block content %}
+
+        {% endblock content %}
+
+    </body>
+</html>
