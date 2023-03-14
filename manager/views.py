@@ -1,9 +1,73 @@
-from django.shortcuts import render
+from django.shortcuts import render,redirect
 from .helpers import TODAY
 from .models import *
+from .forms import *
+from users.forms import *
 from django.utils import timezone
+from django.contrib.auth import authenticate, login, logout
+from django.contrib import messages
 
+def signup(request):
+    page = "Signup"
+    form = CostumUserCreationForm()
+    if request.method == "POST":
+        form = CostumUserCreationForm(request.POST)
+        if form.is_valid():
+            user = form.save(commit=False)
+            user.username = user.username.lower()
+            user.save()
+            login(request, user)
+            #return redirect("user-dashboard", user.id)
+        else:
+            form = CostumUserCreationForm()
 
+    context = {"page":page,
+                "form": form}
+    return render(request, 'manager/login-register.html', context)
+
+def loginUser(request):
+    page = "Login"
+
+    if request.method == "POST":
+        company_id = request.POST.get("company_id")
+        username = request.POST.get("username")
+        password = request.POST.get("password")
+
+        user = authenticate(request, username=username, password=password)
+        if user is not None:
+            if user.in_company:
+                try:
+                    if company_id:
+                        company = Company.objects.get(company_key=company_id)
+                        #filter through the worker and get
+                        if company.worker_set.filter(user=user).exists():
+                            request.session['company_key'] = company_id
+                            login(request, user)
+                            return redirect("company-page", company.id)
+                        else:
+                            messages.error(request, "User is not associated with this company")
+                    #this function is for users who have a
+                    #  company account but wants to login to 
+                    # their personal account so it does that 
+                    # if the company id field is left blank
+                    else:
+                        user.in_company = False
+                        user.save()
+                        login(request,user)
+                        #return redirect("user-dashboard", user.id)
+                except Company.DoesNotExist:
+                    messages.error(request, "Company does not exist")
+            else:
+                login(request, user)
+                #return redirect("user-dashboard", user.id)
+        else:
+            messages.error(request, "Invalid username or password")
+
+    return render(request, 'manager/login-register.html', {"page": "Login"})
+
+def logoutuser(request):
+    logout(request)
+    return redirect("login")
 
 def companypage(request,id):
     company = Company.objects.get(id=id)
@@ -85,3 +149,4 @@ def ProjectPage(request, id):
                      'due_in':due_in,}   
 
     return render(request,'manager/project-page.html', context)
+

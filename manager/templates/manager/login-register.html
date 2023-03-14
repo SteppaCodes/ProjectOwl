@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+
+{% block title %}Login{% endblock title %}
+
+{% block content %}
+
+    {% if page == "Login" %}
+        <form method="POST">
+            {% csrf_token %}
+
+            <input type='text' name='company_id' placeholder='Company_id' /><br>
+            <input type='text' name='username' placeholder='Username' /><br>
+            <input type='password' name='password' placeholder='Username' /><br>
+            <input type='submit' value='login' />
+
+        </form>
+        <p>Not a User Yet?<a href="{% url 'signup' %}">Sign Up</a></p>
+
+        {% else %}
+
+        <form method="POST">
+            {% csrf_token %}
+                {{form.as_p}}
+            <input type='submit' value='SIgnup' />
+        </form>
+
+
+    {% endif %}
+
+{% endblock content %}
