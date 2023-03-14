@@ -380,3 +380,6 @@ def deletemilestone(request,id):
 
     context = {"obj":milestone}
     return render(request,"manager/delete.html", context)
+
+
+       
