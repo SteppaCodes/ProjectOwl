@@ -6,5 +6,7 @@ from users.models import CostumUser
 
 @receiver(post_save,sender= CostumUser)
 def create_work_profile(sender,instance,**Kwargs):
+    print("Triggered")
     if instance.in_company:
         Worker.objects.get_or_create(user=instance)
+        print("worker")

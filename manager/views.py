@@ -3,6 +3,7 @@ from .helpers import TODAY
 from .models import *
 from .forms import *
 from users.forms import *
+from django.contrib.auth import get_user_model
 from django.utils import timezone
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
@@ -69,9 +70,69 @@ def loginUser(request):
     return render(request, 'manager/login-register.html', {"page": "Login"})
 
 def logoutuser(request):
+    user = request.user
+    user.in_company = True
+    user.save()
+    print(request.user.in_company)
     logout(request)
     return redirect("login")
 
+def joincompany(request):
+    # form = JoinCompanyForm()
+    # if request.method == "POST":
+    #     company_id = request.POST.get("company_key")
+    #     user = request.user
+
+    #     form = JoinCompanyForm(request.POST)
+    #     if form.is_valid():
+    #         try:
+    #             company = Company.objects.get(company_key=company_id)
+    #             #Getting all the workers in a company
+    #             members = company.worker_set.all()
+    #             #querying the set to get the first worker with the same user as the present user
+    #             member = members.filter(user=user).first()
+    #             worker = user.worker
+    #             #Checking if the user is not a member of a company
+    #             if not member:
+    #                 #checks if the user has a worker model and then sets user's company to teh company
+    #                 if worker:
+    #                     worker.company = company
+    #                     worker.save()
+    #                 #creates a new user object
+    #                 else:
+    #                    new = Worker.objects.create(user=user, company=company)
+    #                    new.save()
+    #                 return redirect("company-page", company.id)
+    #             else:
+    #                 messages.info(f"You are already a member of {company.name}")
+    #                 form = JoinCompanyForm()
+                    
+    #         except Company.DoesNotExist:
+    #             messages.error(request, "Invalid company id")
+    # else:
+    #     form = JoinCompanyForm()
+
+    # context = {"form": form}
+    return render(request, "manager/create-edit.html")
+
+def switchaccount(request):
+    User = get_user_model()
+    user = request.user
+    
+    if user.in_company:
+        user.in_company = False
+        user.save()
+        return redirect("user-dashboard", user.id)
+    else:
+        user.in_company = True
+        user.save()
+        # Check if the user is associated with any company
+        if user.worker.company:
+            user_company_key = user.worker.company.company_key
+            request.session['company_key'] = user_company_key
+            return redirect("company-page", user.worker.company.id)
+        else:
+            return redirect("join-company") 
 
 def userdashboard(request, id):
     user = CostumUser.objects.get(id=id)
