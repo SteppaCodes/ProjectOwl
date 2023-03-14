@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h4>{{user.username}}</h4>
+
+{% if request.user == profile.user %}
+    {% comment %} <p><a href="{% url 'edit-profile' user.id %}">Edit</a></p> {% endcomment %}
+    <p>{{greet}} {{request.user.username}}</p>
+{% endif %}
+
+<img src='{{profile.getavatar}}'style='width: 100px;height:100px ;border-radius: 500px;'></img>
+<p>Fullname: {{profile.fullname}}</p>
+<p>Email: {{profile.email}}</p>
+<p>Country: {{profile.country}}</p>
+{% if request.user.in_company %}
+    <p>Team: {{user.team}}</p>
+{% endif %}
+
+<hr>
+<h3>projects</h3>
+{% if request.user.in_company %}
+<p>Involved in {{count}} projects</p>
+{% else %}
+<p>{{count}} {% if count > 1 %}
+        Projects
+        {% else %}
+        Project
+    {% endif %}</p>
+{% endif %}
+
+{% if request.user.in_company == False %}
+    {% comment %} <p><a href = "{% url 'createproject' %}">New Project</a></p> {% endcomment %}
+{% endif %}
+
+    {% for project in projects %}
+        {% comment %} <p><a href="{% url 'project-detail' project.id %}">{{project.name}}</a></p>
+        <p><a href="{% url 'delete-project' project.id %}">Delete</a></p> {% endcomment %}
+        <p>{{project.progress}}%</p>
+        {% if project.due_in  > 0 %}
+        <p>Due in : {{project.due_in}} {% if project.due_in > 1 %}days{% else %} day {% endif %} </p>
+        {% elif project.due_in == 0 %}
+        <p>Project due today</p>
+        {% endif %}
+        
+    {% endfor %}
+
+{% endblock content %}
