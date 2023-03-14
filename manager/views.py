@@ -17,7 +17,7 @@ def signup(request):
             user.username = user.username.lower()
             user.save()
             login(request, user)
-            #return redirect("user-dashboard", user.id)
+            return redirect("user-dashboard", user.id)
         else:
             form = CostumUserCreationForm()
 
@@ -43,6 +43,7 @@ def loginUser(request):
                         if company.worker_set.filter(user=user).exists():
                             request.session['company_key'] = company_id
                             login(request, user)
+                            print(user.in_company)
                             return redirect("company-page", company.id)
                         else:
                             messages.error(request, "User is not associated with this company")
@@ -54,12 +55,14 @@ def loginUser(request):
                         user.in_company = False
                         user.save()
                         login(request,user)
-                        #return redirect("user-dashboard", user.id)
+                        print(user.in_company)
+                        return redirect("user-dashboard", user.id)
                 except Company.DoesNotExist:
                     messages.error(request, "Company does not exist")
             else:
                 login(request, user)
-                #return redirect("user-dashboard", user.id)
+                print(user.in_company)
+                return redirect("user-dashboard", user.id)
         else:
             messages.error(request, "Invalid username or password")
 
@@ -68,6 +71,44 @@ def loginUser(request):
 def logoutuser(request):
     logout(request)
     return redirect("login")
+
+
+def userdashboard(request, id):
+    user = CostumUser.objects.get(id=id)
+    profile = Profile.objects.get(user=user)
+
+    if request.user.in_company:
+        company_key = request.session.get('company_key')
+        if company_key != None:
+            company = Company.objects.get(company_key=company_key)
+            #distinct() => Makes sure theres only one of each returned value
+            projects = company.project_set.filter(teams__workers__user__username=user.username).distinct()
+
+            context = {"user": user,
+                        "profile": profile, 
+                        "projects": projects, 
+                        "count": projects.count()
+                        }
+        else:
+            #messages.error("You do not have a company account")
+            return redirect("login")
+    else:
+        user = request.user
+        projects = user.project_set.filter(is_personal=True)
+        count = projects.count()
+        for project in projects:
+            deadline = project.deadline
+            if project.deadline:
+                project.due_in = deadline.date() - TODAY
+                project.due_in = project.due_in.days
+                project.save()
+
+        context = {"profile":profile,
+                    'projects':projects, 
+                    'count':count
+                    }
+    
+    return render(request,'manager/user-dashboard.html', context)
 
 def companypage(request,id):
     company = Company.objects.get(id=id)

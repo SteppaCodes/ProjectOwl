@@ -41,7 +41,7 @@
          {% endcomment %}
             {% for milestone in milestones %}
             
-            {% if request.user.in_company %}<small>{{milestone.created_by}}</small>{% endif %}
+            {% if request.user.in_company %}<small><a href="{% url 'user-dashboard' user.id %}">{{milestone.created_by}}</a></small>{% endif %}
                 {% comment %} <small>{{milestone.created | timesince}} ago</small> {% endcomment %}
                 <p>{{milestone.name}}</p>
                 <p>{{milestone.time_spent}}</p>
