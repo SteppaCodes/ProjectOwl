@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+
+    {% block title %}{{company.name}}{% endblock title %}
+{% block content %}
+
+<style>
+    .page-container{
+        display: grid;
+        grid-template-columns: 1fr 3fr 1fr;
+    }
+    
+</style>
+
+<div class='page-container'>
+
+    <div>
+
+    </div>
+    <div>
+        <div>
+            <h1>{{project.name}}</h1>
+        </div>
+        <div>
+            <p>Description: {{project.description}}</p>
+            <p>Status: {{project.status}}</p>
+            <p>Created: {{project.created| timesince}} ago</p>
+            <p>Progress: {{project.progress}}%</p>
+            {% if project.due_in %}
+                <p>Due in : {{project.due_in}} {% if project.due_in > 1 %}days {% else %}day{% endif %}</p>
+            {%elif project.due_in == 0%}
+                <p>Project deadline is today</p>
+            {% else %}
+                <p>You did not set a deadline</p>
+            {% endif %}
+            <p>Number of milestones: {{count}}</p>
+            <hr>
+        </div>
+        <div>
+            <h3>milestones</h3>
+            {% comment %} <small><a href="{% url 'createmilestone' project.id %}">New milestone</a></small><br>
+         {% endcomment %}
+            {% for milestone in milestones %}
+            
+            {% if request.user.in_company %}<small>{{milestone.created_by}}</small>{% endif %}
+                {% comment %} <small>{{milestone.created | timesince}} ago</small> {% endcomment %}
+                <p>{{milestone.name}}</p>
+                <p>{{milestone.time_spent}}</p>
+                {% comment %} <small><a href="{% url 'start-milestone' milestone.id %}">Start</a></small>
+                <small><a href="{% url 'pause-milestone' milestone.id %}">Pause</a></small>
+                <small><a href="{% url 'complete-milestone' milestone.id %}">Completed</a></small><br>
+                <p><a href="{% url 'delete-milestone' milestone.id %}">Delete</a></p> {% endcomment %}
+                <small>{{milestone.value}}%</small>
+                <small>{{milestone.status}}</small><hr>
+            {% endfor %}
+        
+        </div>
+    </div>
+    <div>
+        {% if request.user.in_company %}
+            <h3>Teams</h3>
+            {% for team in teams  %}
+                <p>{{team.name}}</p>
+            {% endfor %}
+
+            {% comment %} {% for worker in workers %}
+                <small><a href="{% url 'user-dashboard' worker.user.id %}">{{worker.user.username}}</a></small><br>
+                
+            {% endfor %} {% endcomment %}
+            <hr>
+    {% endif %}
+
+    </div>
+
+</div>
+
+{% endblock content %}
