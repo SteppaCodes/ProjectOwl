@@ -9,7 +9,15 @@
         <title>ProjectHelper | {% block title %}{% endblock title %}</title>
     </head>
     <body>
+        <p><a href='{% url "logout" %}'>Logout</a></p>
+        <p><a href='{% url "switch-account" %}'>
+            {% if request.user.in_company %}
+                Switch to personal account
+            {% else %}
+                Switch to company account
+            {% endif %}
 
+        </a></p>
         {% for message in messages %}
         <h4>{{message}}</h4>
         {% endfor %}

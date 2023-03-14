@@ -29,7 +29,7 @@ class Company(models.Model):
     owner = models.ForeignKey(CostumUser, on_delete=models.CASCADE)
     website = models.URLField(default='', max_length=2000, null=True, blank=True)
     description = models.TextField()
-    company_key = models.CharField(max_length=200, default='0000')
+    company_key = models.CharField(max_length=200, default=None)
     logo = models.ImageField( default='', upload_to="logos/",null=True,blank=True)
     updated = models.DateTimeField(auto_now=True)
     created = models.DateTimeField(auto_now_add=True)
@@ -58,7 +58,7 @@ class Team(models.Model):
 
 class Worker(models.Model):
     user = models.OneToOneField(CostumUser,on_delete=models.CASCADE,verbose_name="Workers")
-    company = models.ForeignKey(Company, on_delete=models.CASCADE, null=True,blank=True,default='Company Not Set')
+    company = models.ForeignKey(Company, on_delete=models.CASCADE, null=True,blank=True,default=None)
 
     def __str__(self):
         return f"{self.user.username}"
