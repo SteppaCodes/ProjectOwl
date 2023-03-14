@@ -78,42 +78,42 @@ def logoutuser(request):
     return redirect("login")
 
 def joincompany(request):
-    # form = JoinCompanyForm()
-    # if request.method == "POST":
-    #     company_id = request.POST.get("company_key")
-    #     user = request.user
+    form = JoinCompanyForm()
+    if request.method == "POST":
+        company_id = request.POST.get("company_key")
+        user = request.user
 
-    #     form = JoinCompanyForm(request.POST)
-    #     if form.is_valid():
-    #         try:
-    #             company = Company.objects.get(company_key=company_id)
-    #             #Getting all the workers in a company
-    #             members = company.worker_set.all()
-    #             #querying the set to get the first worker with the same user as the present user
-    #             member = members.filter(user=user).first()
-    #             worker = user.worker
-    #             #Checking if the user is not a member of a company
-    #             if not member:
-    #                 #checks if the user has a worker model and then sets user's company to teh company
-    #                 if worker:
-    #                     worker.company = company
-    #                     worker.save()
-    #                 #creates a new user object
-    #                 else:
-    #                    new = Worker.objects.create(user=user, company=company)
-    #                    new.save()
-    #                 return redirect("company-page", company.id)
-    #             else:
-    #                 messages.info(f"You are already a member of {company.name}")
-    #                 form = JoinCompanyForm()
+        form = JoinCompanyForm(request.POST)
+        if form.is_valid():
+            try:
+                company = Company.objects.get(company_key=company_id)
+                #Getting all the workers in a company
+                members = company.worker_set.all()
+                #querying the set to get the first worker with the same user as the present user
+                member = members.filter(user=user).first()
+                worker = user.worker
+                #Checking if the user is not a member of a company
+                if not member:
+                    #checks if the user has a worker model and then sets user's company to teh company
+                    if worker:
+                        worker.company = company
+                        worker.save()
+                    #creates a new user object
+                    else:
+                       new = Worker.objects.create(user=user, company=company)
+                       new.save()
+                    return redirect("company-page", company.id)
+                else:
+                    messages.info(f"You are already a member of {company.name}")
+                    form = JoinCompanyForm()
                     
-    #         except Company.DoesNotExist:
-    #             messages.error(request, "Invalid company id")
-    # else:
-    #     form = JoinCompanyForm()
+            except Company.DoesNotExist:
+                messages.error(request, "Invalid company id")
+    else:
+        form = JoinCompanyForm()
 
-    # context = {"form": form}
-    return render(request, "manager/create-edit.html")
+    context = {"form": form}
+    return render(request, "manager/create-edit.html",context)
 
 def switchaccount(request):
     User = get_user_model()
