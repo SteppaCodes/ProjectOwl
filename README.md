@@ -8,9 +8,15 @@ I plan on finishing it as soon as possible and hopefully host it
 #Features(Ones starting with * have already been created )
 
 *CRUD Project, Milestones, Company, Tasks, Teams
+
 *Have both personal and company account
+
 *Switch between account types
+
 *Authentication
+
 Time tracking
+
 Assigning and reassigning of tasks
+
 *Project Progress Tracking
