@@ -20,6 +20,7 @@
         <div>
             {% if workers.count > 0 %}
                 {% for worker in workers  %}
+                <p>{{worker}}</p>
                 {% comment %} <p><a href="{% url 'user-dashboard' worker.user.id %}">{{worker.user.username}}</a></p> {% endcomment %}
                 {% endfor %}
             {% endif %}
