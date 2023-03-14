@@ -19,6 +19,8 @@
     <div>
         <div>
             <h1>{{project.name}}</h1>
+            <small><a href="{% url 'update-project' project.id %}">Edit</a></small>
+            <small><a href="{% url 'delete-project' project.id %}">Delete</a></small>
         </div>
         <div>
             <p>Description: {{project.description}}</p>
@@ -36,13 +38,16 @@
             <hr>
         </div>
         <div>
-            <h3>milestones</h3>
-            {% comment %} <small><a href="{% url 'createmilestone' project.id %}">New milestone</a></small><br>
-         {% endcomment %}
+            <div>
+                <h3>milestones</h3>
+                <h5><a href="{% url 'create-milestone' project.id %}">New milestone<br></a></h5>
+            </div>
+   
             {% for milestone in milestones %}
             
-            {% if request.user.in_company %}<small><a href="{% url 'user-dashboard' user.id %}">{{milestone.created_by}}</a></small>{% endif %}
-                {% comment %} <small>{{milestone.created | timesince}} ago</small> {% endcomment %}
+            {% if request.user.in_company %}<small><a href="{% url 'user-dashboard' user.id %}">{{milestone.created_by}}<br></a></small>{% endif %}
+                <small>{{milestone.created | timesince}} ago</small> 
+                <p><a href="{% url 'update-milestone' milestone.id %}">Edit</a></p><small><a href="{% url 'delete-milestone' milestone.id %}">Delete</a></small>
                 <p>{{milestone.name}}</p>
                 <p>{{milestone.time_spent}}</p>
                 {% comment %} <small><a href="{% url 'start-milestone' milestone.id %}">Start</a></small>

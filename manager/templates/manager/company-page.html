@@ -35,22 +35,32 @@
             <p>Website : <a href="{{company.website}}">{{company.website}}</a></p><hr>
         </div>
         <div>
+            <h5><a href="{% url 'create-project' %}">New Project</a></h5>
             {% for project in projects %}
-                <h5>{{project.name}}</h5>
+                <h5><a href="{% url 'project-page' project.id %}">{{project.name}}</a></h5>
                 {% if project.progress > 0 %}
                     <p>{{project.progress}}%</p>
                 {% else %}
                     <p>0%</p>
                 {% endif %}
-                {% if project.due_in %}
-                    <p>Due in : {{project.due_in}} {% if project.due_in > 1 %}days {% else %}day{% endif %}</p>
-                {%elif project.due_in == 0%}
+                <a href="{% url 'update-project' project.id %}">Edit</a></small>
+                <small><a href="{% url 'delete-project' project.id %}">Delete</a></small>
+                {% if project.deadline %}
+                    {% if project.due_in %}
+                        <p>Due in : {{project.due_in}} {% if project.due_in > 1 %}days {% else %}day{% endif %}</p>
+                    {%elif project.due_in == 0 %}
                     <p>Project deadline is today</p>
+                    {% endif %}
                 {% else %}
                     <p>You did not set a deadline</p>
                 {% endif %}
             {% endfor %}
         </div>
+    </div>
+
+    <div>
+        <h4>Activities</h4>
+        {% include 'manager/activities.html' %}
     </div>
 
 </div>

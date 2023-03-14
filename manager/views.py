@@ -177,7 +177,7 @@ def companypage(request,id):
     projects = company.project_set.all()
     teams = company.team_set.all()
 
-    due_in = 0
+    due_in = None
     for project in projects:
         deadline = project.deadline
         deadline = timezone.localtime(deadline)
@@ -185,6 +185,9 @@ def companypage(request,id):
                 due_in = int((deadline.date() - TODAY).days)
                 project.due_in = due_in
                 project.save()   
+        else:
+            project.due_in = None
+            project.save()
    
     context = {'company':company,
                 "workers":workers, 
@@ -252,3 +255,128 @@ def ProjectPage(request, id):
 
     return render(request,'manager/project-page.html', context)
 
+def createproject(request):
+
+    if request.user.in_company:
+        form = CompanyProjectForm()
+    else:
+        form = PersonalProjectForm()
+
+    if request.method == "POST":
+        if request.user.in_company:
+            form = CompanyProjectForm(request.POST)
+        else:
+            form = PersonalProjectForm(request.POST)
+        if form.is_valid():
+            project = form.save(commit=False)
+            project.created_by = request.user
+            if request.user.in_company:
+                #retrieving the company key from the session 
+                key = request.session.get('company_key')
+                #Getting the company data and setting the project.company to the current company the user is looged in to
+                company = Company.objects.get(company_key = key)
+                project.company = company
+            else:
+                project.is_personal = True
+                project.created_by = request.user
+                project.save()
+                return redirect("user-dashboard", request.user.id)
+            
+            project.save()
+            
+            #getting the id of each department selected and adding it to the department row of the table
+            for team_id in form.cleaned_data['teams']:
+                team = Team.objects.get(id=team_id.id)
+                project.teams.add(team)
+
+            return redirect("company-page", company.id)
+        
+    context = {"form":form}
+    return render(request,"manager/create-edit.html", context)
+
+def updateproject(request, id):
+    project = Project.objects.get(id=id)
+
+    if request.user.in_company:
+        form = CompanyProjectForm(instance=project)
+    else:
+        form = PersonalProjectForm(instance=project)
+    # company = Company.objects.get(id=id)
+    company = project.company
+    print(company)
+
+    if request.method == "POST":
+        if request.user.in_company:
+            form = CompanyProjectForm(request.POST,instance=project)
+        else:
+            form = PersonalProjectForm(request.POST,instance=project)
+        if form.is_valid():
+            project = form.save(commit=False)
+            if request.user.in_company:
+                project.company = company
+                project.updated_by = request.user
+                project.save()
+
+            # Clear existing teams
+                project.teams.clear()
+
+                for team_id in form.cleaned_data['teams']:
+                    team = Team.objects.get(id=team_id.id)
+                    project.teams.add(team)
+            else:
+                project.save()
+            
+            return redirect("project-page", project.id)
+
+    context = {"form":form}
+    return render(request,"manager/create-edit.html", context) 
+
+def deleteproject(request,id):
+    project = Project.objects.get(id=id)
+    if request.method == "POST":
+        project.delete()
+        if request.user.in_company:
+            return redirect("company-page", project.company.id)
+        else:
+            return redirect("user-dashboard", request.user.id)
+
+    context = {"obj":project}
+    return render(request,"manager/delete.html", context)
+
+def createmilestone(request, id):
+    project = Project.objects.get(id=id)
+    form = MileStoneForm()
+    if request.method == "POST":
+        form = MileStoneForm(request.POST)
+        if form.is_valid():
+            milestone = form.save(commit=False)
+            milestone.project = project
+            milestone.created_by = request.user
+            milestone.save()
+            return redirect("project-page", project.id)
+
+    context = {"form":form}
+    return render(request,"manager/create-edit.html", context)
+
+def updatemilestone(request, id):
+    milestone = MileStone.objects.get(id=id)
+    form = MileStoneForm(instance=milestone)
+    if request.method == "POST":
+        form = MileStoneForm(request.POST, instance=milestone)
+        if form.is_valid():
+            milestone = form.save(commit=False)
+            milestone.save()
+            return redirect("project-page", milestone.project.id)
+
+    context = {"form":form}
+    return render(request,"manager/create-edit.html", context) 
+
+def deletemilestone(request,id):
+    milestone = MileStone.objects.get(id=id)
+    
+    if request.method == "POST":
+        milestone.delete()
+        return redirect("project-page", milestone.project.id)
+
+    context = {"obj":milestone}
+    return render(request,"manager/delete.html", context)
