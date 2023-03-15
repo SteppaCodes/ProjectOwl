@@ -1,5 +1,5 @@
 from django.forms import ModelForm
-from . models import Team,Project,MileStone, Company
+from . models import Team,Project,MileStone, Company, Task
 
 class CreateCompanyForm(ModelForm):
     class Meta:
@@ -39,3 +39,9 @@ class JoinCompanyForm(ModelForm):
     class Meta:
         model = Company
         fields = ['company_key']
+
+
+class TaskForm(ModelForm):
+    class Meta:
+        model = Task
+        fields =['name', 'workers']

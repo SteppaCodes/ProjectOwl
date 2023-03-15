@@ -1,5 +1,4 @@
 
-
 <style>
 
     .activity-stat{
@@ -14,17 +13,5 @@
 
 {% for activity in activities  %}
 <p class='activity-stat'><span class='activity-user'>{{activity.user.username}}</span> 
-    {{activity.message}} <span class='activity-reciever'>
-
-        {% if activity.message != "deleted -" and activity.name %}
-            {% if activity.project %}
-                {{ activity.name }}
-            {% else %}
-                {{ activity.name }}
-            {% endif %}
-        {% elif activity.message == "deleted -" %}
-            {{ activity.name }}
-        {% else %}
-            {{ activity.milestone }}
-        {% endif %}
+    {{activity.message}} <span class='activity-reciever'> {{activity.name}}
 {% endfor %}

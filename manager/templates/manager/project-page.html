@@ -48,12 +48,8 @@
             {% if request.user.in_company %}<small><a href="{% url 'user-dashboard' user.id %}">{{milestone.created_by}}<br></a></small>{% endif %}
                 <small>{{milestone.created | timesince}} ago</small> 
                 <p><a href="{% url 'update-milestone' milestone.id %}">Edit</a></p><small><a href="{% url 'delete-milestone' milestone.id %}">Delete</a></small>
-                <p>{{milestone.name}}</p>
+                <p><a href="{% url 'milestone-page' milestone.id %}">{{milestone.name}}<br></a></p>
                 <p>{{milestone.time_spent}}</p>
-                {% comment %} <small><a href="{% url 'start-milestone' milestone.id %}">Start</a></small>
-                <small><a href="{% url 'pause-milestone' milestone.id %}">Pause</a></small>
-                <small><a href="{% url 'complete-milestone' milestone.id %}">Completed</a></small><br>
-                <p><a href="{% url 'delete-milestone' milestone.id %}">Delete</a></p> {% endcomment %}
                 <small>{{milestone.value}}%</small>
                 <small>{{milestone.status}}</small><hr>
             {% endfor %}
