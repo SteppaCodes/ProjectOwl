@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+
+    {% block title %}Teams{% endblock title %}
+{% block content %}
+
+<style>
+    .tasks-container{
+        display: grid;
+        grid-template-columns: 0.5fr 3fr 1fr;
+    }
+    
+</style>
+<div class='tasks-container'>
+
+    <div>
+        <p></p>
+    </div>
+        
+    <div>
+        <div>
+            <h3>{{milestone.name}}</h3>
+            <small><a href="{% url 'create-task' milestone.id %}">New Task</a></small>
+        </div>
+        <div>
+            {% for task in tasks %}
+                <h5>{{task.name}}</h5>
+                <small><a href="{% url 'update-task' task.id %}">Edit</a></small>
+                <small><a href="{% url 'delete-task' task.id %}">Delete</a></small><br>
+                <small>Status: {{task.status}}</small><br>
+                <small>Time spent {{task.time_spent}}</small><br>
+                <small><a href="{% url 'start-task' task.id %}">start</a></small>
+                <small><a href="{% url 'pause-task' task.id %}">pause</a></small>
+                <small><a href="{% url 'completed-task' task.id %}">complete</a></small>
+                <hr>
+            {% endfor %}
+        </div>
+
+    </div>
+        
+    <div>
+
+    </div>
+</div>
+
+{% endblock %}

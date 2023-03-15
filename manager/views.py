@@ -1,4 +1,5 @@
 from django.shortcuts import render,redirect
+from django.http.response import HttpResponse
 from .helpers import TODAY
 from .models import *
 from .forms import *
@@ -350,7 +351,6 @@ def updateproject(request, id):
 
 def deleteproject(request,id):
     project = Project.objects.get(id=id)
-    print(project.name)
     if request.user.in_company:
             company = request.user.worker.company
             activity = Activity.objects.create(
@@ -386,6 +386,13 @@ def createmilestone(request, id):
     context = {"form":form}
     return render(request,"manager/create-edit.html", context)
 
+def milestonepage(request, id):
+    milestone = MileStone.objects.get(id=id)
+    tasks = milestone.task_set.all()
+
+    context = {"milestone": milestone , 'tasks':tasks}
+    return render(request,"manager/milestone-page.html", context)    
+
 def updatemilestone(request, id):
     milestone = MileStone.objects.get(id=id)
     form = MileStoneForm(instance=milestone)
@@ -407,6 +414,122 @@ def deletemilestone(request,id):
         return redirect("project-page", milestone.project.id)
 
     context = {"obj":milestone}
+    return render(request,"manager/delete.html", context)
+
+def createtask(request, id):
+    milestone = MileStone.objects.get(id=id)
+    form = TaskForm()
+
+    if request.method == "POST":
+        form = TaskForm(request.POST)
+        if form.is_valid():
+            task = form.save(commit=False)
+            task.milestone = milestone
+            task.created_by=request.user
+            task.save()
+
+            if request.user.in_company:
+                company = request.user.worker.company
+
+                activity = Activity.objects.create(
+                    user=request.user,
+                    task=task,
+                    message="created a new task",
+                    company=company,
+                    name=task.name
+                )
+                activity.save()
+
+            for worker_id in form.cleaned_data['workers']:
+                worker = Worker.objects.get(id=worker_id.id)
+                task.workers.add(worker)
+            return redirect("milestone-page", milestone.id)
+
+    context = {"form":form}
+    return render(request,"manager/create-edit.html", context)
+
+def updatetask(request, id):
+    task =Task.objects.get(id=id)
+    form = TaskForm(instance=task)
+
+    if request.method == "POST":
+        form = TaskForm(request.POST,instance=task)
+        if form.is_valid():
+            task = form.save(commit=False)
+            task.save()
+
+            activity = Activity.objects.create(
+                    user=request.user,
+                    task=task,
+                    message= "updated task",
+                    name=task.name
+                )
+            activity.save()
+
+            task.workers.clear()
+
+            for worker_id in form.cleaned_data['workers']:
+                worker = Worker.objects.get(id=worker_id.id)
+                task.workers.add(worker)
+
+            return redirect("milestone-page", task.milestone.id)
+
+    context = {"form":form}
+    return render(request,"manager/create-edit.html", context) 
+
+def starttask(request, id):
+    task = Task.objects.get(id=id)
+
+    if request.method == "GET":
+        NOW = timezone.now()
+        #Set the start time of the milestone to the current time
+        task.start_time = NOW
+        task.status = "In Progress"
+        task.save()
+        return redirect('milestone-page', task.milestone.id)
+
+def pausetask(request,id):
+    task = Task.objects.get(id=id)
+    
+    if request.method == "GET":
+        NOW = timezone.now()
+
+        if task.time_spent is not None:
+            if task.status != "Paused":
+                task.time_spent += (NOW - task.start_time)
+                task.start_time = None
+                task.status = "Paused"
+                task.save()
+            else:
+                return HttpResponse("milestone is not in progress")
+        return redirect('milestone-page', task.milestone.id)
+
+def completetask(request,id):
+    task = Task.objects.get(id=id)
+    
+    if request.method == "GET":
+        task.status = "Completed"
+        task.complete = True
+        task.save()
+        return redirect('milestone-page', task.milestone.id)
+
+def deletetask(request,id):
+    task = Task.objects.get(id=id)
+    if request.user.in_company:
+        company = request.user.worker.company
+        activity = Activity.objects.create(
+                user=request.user,
+                task=task,
+                message="deleted task",
+                company=company,
+                name= task.name
+                )
+        activity.save()
+    if request.method == "POST":
+        task.delete()
+        return redirect("milestone-page", task.milestone.id)
+
+    context = {"obj": task}
     return render(request,"manager/delete.html", context)
 
 def createteam(request):

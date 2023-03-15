@@ -1,9 +1,10 @@
 from django.db import models
 from users.models import CostumUser
 from datetime import timedelta
+from django.utils import timezone
 
-# Create your models here.
-class ProjectInfo(models.Model):
+
+class Info(models.Model):
 
     STATUS = (
         ("In Progress", "In Progress"),
@@ -13,8 +14,8 @@ class ProjectInfo(models.Model):
     )
 
     name = models.CharField(max_length=200)
-    description = models.TextField()
-    created_by = models.ForeignKey(CostumUser, on_delete=models.CASCADE)
+    description = models.TextField(default='')
+    created_by = models.ForeignKey(CostumUser, on_delete=models.CASCADE, default='', null=True,blank=True)
     complete = models.BooleanField(default=False)
     updated = models.DateTimeField(auto_now=True)
     status = models.CharField(choices=STATUS, default='In Queue',max_length=200)
@@ -53,7 +54,6 @@ class Team(models.Model):
     workers = models.ManyToManyField("Worker")
     updated_by = models.ForeignKey(CostumUser, related_name="update_team", on_delete=models.CASCADE, null=True, blank=True)
 
-
     class Meta:
         verbose_name = "Team"
         verbose_name_plural = "Teams"
@@ -74,7 +74,7 @@ class Worker(models.Model):
         verbose_name_plural = "Workers"
 
 
-class Project(ProjectInfo):
+class Project(Info):
     company = models.ForeignKey(Company, on_delete=models.CASCADE, default = None, null=True, blank=True)
     progress = models.IntegerField(default=0, null=True, blank=True)
     teams = models.ManyToManyField(Team, null=True, blank=True)
@@ -87,13 +87,12 @@ class Project(ProjectInfo):
     def __str__(self):
         return self.name
 
-class MileStone(ProjectInfo):
+
+class MileStone(Info):
     project = models.ForeignKey(Project, on_delete=models.CASCADE)
     value = models.IntegerField(default=0, null=True,blank=True)
     updated_by = models.ForeignKey(CostumUser, related_name="updated", on_delete=models.CASCADE, null=True, blank=True)
     updated_at = models.DateTimeField(auto_now=True, null=True, blank=True)
-
-
 
     class Meta:
         ordering = ['-updated']
@@ -103,8 +102,10 @@ class MileStone(ProjectInfo):
     def __str__(self):
         return self.name
     
-class Task(models.Model):
-    name = models.CharField(max_length=200, default='New Task',verbose_name = "Milestone")
+
+class Task(Info):
+    milestone = models.ForeignKey(MileStone,on_delete=models.SET_NULL, null=True,blank=True)
+    workers = models.ManyToManyField(Worker)
     start_time = models.DateTimeField(null=True, blank=True)
     pause_time = models.DurationField(null=True, blank=True)
     end_time = models.DateTimeField(null=True, blank=True)
@@ -116,6 +117,7 @@ class Activity(models.Model):
     user = models.ForeignKey(CostumUser, on_delete=models.CASCADE,null=True,blank=True)
     project = models.ForeignKey(Project, on_delete=models.SET_NULL, null=True, blank=True)
     milestone = models.ForeignKey(MileStone, on_delete=models.SET_NULL, null=True, blank=True)
+    task = models.ForeignKey(Task, on_delete=models.SET_NULL, null=True, blank=True)
     message = models.CharField(max_length=2000, default= "New Activity")
     company = models.ForeignKey(Company,null=True,blank=True, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
