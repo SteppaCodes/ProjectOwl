@@ -44,7 +44,6 @@ def loginUser(request):
                         if company.worker_set.filter(user=user).exists():
                             request.session['company_key'] = company_id
                             login(request, user)
-                            print(user.in_company)
                             return redirect("company-page", company.id)
                         else:
                             messages.error(request, "User is not associated with this company")
@@ -56,7 +55,6 @@ def loginUser(request):
                         user.in_company = False
                         user.save()
                         login(request,user)
-                        print(user.in_company)
                         return redirect("user-dashboard", user.id)
                 except Company.DoesNotExist:
                     messages.error(request, "Company does not exist")
@@ -73,7 +71,6 @@ def logoutuser(request):
     user = request.user
     user.in_company = True
     user.save()
-    print(request.user.in_company)
     logout(request)
     return redirect("login")
 
@@ -151,7 +148,6 @@ def userdashboard(request, id):
                         "count": projects.count()
                         }
         else:
-            #messages.error("You do not have a company account")
             return redirect("login")
     else:
         user = request.user
@@ -451,7 +447,12 @@ def teamdashboard(request,id):
         if team in project.teams.all():
             team_projects.append(project)
 
-    context = {"team":team, "members":members , "projects":team_projects}
+    context = {
+               "team":team,
+               "members":members ,
+               "projects":team_projects
+              }
+    
     return render(request, "manager/team-dashboard.html", context)
 
 def updateteam(request, id):
