@@ -36,3 +36,5 @@ Users with multiple companies
 Notification system
 
 User approval during sign up
+![Company Home](https://user-images.githubusercontent.com/105548020/225363143-e61ea87e-3511-43b8-b9e3-d86e0e2a60f0.png)
+Proposed UI design - I designed it btw
