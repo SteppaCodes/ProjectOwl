@@ -82,6 +82,7 @@ class Project(ProjectInfo):
     is_personal = models.BooleanField(default=False, blank=True, null=True)
     due_in = models.IntegerField(null = True, blank=True, default=None)
     updated_by = models.ForeignKey(CostumUser, related_name="up_dated", on_delete=models.CASCADE, null=True, blank=True)
+    updated_at = models.DateTimeField(auto_now=True,null=True, blank=True)
 
     def __str__(self):
         return self.name
@@ -90,6 +91,8 @@ class MileStone(ProjectInfo):
     project = models.ForeignKey(Project, on_delete=models.CASCADE)
     value = models.IntegerField(default=0, null=True,blank=True)
     updated_by = models.ForeignKey(CostumUser, related_name="updated", on_delete=models.CASCADE, null=True, blank=True)
+    updated_at = models.DateTimeField(auto_now=True, null=True, blank=True)
+
 
 
     class Meta:
@@ -109,9 +112,10 @@ class Task(models.Model):
                                                         
                                                      
 class Activity(models.Model):
+    name = models.CharField(max_length=200, default =None, null=True,blank=True)
     user = models.ForeignKey(CostumUser, on_delete=models.CASCADE,null=True,blank=True)
-    project = models.ForeignKey(Project, on_delete=models.CASCADE, null=True, blank=True)
-    milestone = models.ForeignKey(MileStone, on_delete=models.CASCADE, null=True, blank=True)
+    project = models.ForeignKey(Project, on_delete=models.SET_NULL, null=True, blank=True)
+    milestone = models.ForeignKey(MileStone, on_delete=models.SET_NULL, null=True, blank=True)
     message = models.CharField(max_length=2000, default= "New Activity")
     company = models.ForeignKey(Company,null=True,blank=True, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)

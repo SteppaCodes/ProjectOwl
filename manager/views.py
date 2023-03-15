@@ -176,6 +176,7 @@ def companypage(request,id):
     workers = company.worker_set.all()
     projects = company.project_set.all()
     teams = company.team_set.all()
+    activities = company.activity_set.all()[:5]
 
     due_in = None
     for project in projects:
@@ -193,7 +194,8 @@ def companypage(request,id):
                 "workers":workers, 
                 "projects":projects, 
                 "teams": teams,
-                "due_in":due_in
+                "due_in":due_in,
+                'activities':activities
                   }
     return render(request,'manager/company-page.html', context)
 
@@ -225,6 +227,18 @@ def createproject(request):
                 return redirect("user-dashboard", request.user.id)
             
             project.save()
+
+            if request.user.in_company:
+                company = request.user.worker.company
+
+                activity = Activity.objects.create(
+                    user=request.user,
+                    project=project,
+                    message="created a new project",
+                    company=company,
+                    name=project.name
+                )
+                activity.save()
             
             #getting the id of each department selected and adding it to the department row of the table
             for team_id in form.cleaned_data['teams']:
@@ -301,9 +315,7 @@ def updateproject(request, id):
         form = CompanyProjectForm(instance=project)
     else:
         form = PersonalProjectForm(instance=project)
-    # company = Company.objects.get(id=id)
     company = project.company
-    print(company)
 
     if request.method == "POST":
         if request.user.in_company:
@@ -316,6 +328,15 @@ def updateproject(request, id):
                 project.company = company
                 project.updated_by = request.user
                 project.save()
+
+                activity = Activity.objects.create(
+                    user=request.user,
+                    project=project,
+                    message= f"updated project -> ",
+                    company=company,
+                    name=project.name
+                )
+                activity.save()
 
             # Clear existing teams
                 project.teams.clear()
@@ -333,13 +354,24 @@ def updateproject(request, id):
 
 def deleteproject(request,id):
     project = Project.objects.get(id=id)
+    print(project.name)
+    if request.user.in_company:
+            company = request.user.worker.company
+            activity = Activity.objects.create(
+                    user=request.user,
+                    project=project,
+                    message="deleted -",
+                    company=company,
+                    name= project.name
+                )
+            activity.save()
     if request.method == "POST":
         project.delete()
         if request.user.in_company:
             return redirect("company-page", project.company.id)
         else:
             return redirect("user-dashboard", request.user.id)
-
+    
     context = {"obj":project}
     return render(request,"manager/delete.html", context)
 
