@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+
+    {% block title %}Teams{% endblock title %}
+{% block content %}
+
+<style>
+    .team-container{
+        display: grid;
+        grid-template-columns: 0.5fr 3.5fr 1fr;
+    }
+    
+</style>
+
+<div class='team-container'>
+
+    <div>
+
+    </div>
+
+    <div>
+        <div>
+            <h2>{{team.name}}</h2>
+            <small><a href="{% url 'update-team' team.id %}">Edit</a></small>
+            <small><a href="{% url 'delete-team' team.id %}">Delete</a></small>
+        </div>
+        <div>
+            {% for project in projects  %}
+                <p>{{project.name}}</p>
+            {% endfor %}
+        </div>
+    </div>
+    
+    <div>
+        <div>
+            <h5>Head</h5>
+        </div>
+        <div>
+            <h5>Co-workers</h5>
+            {% for member in members  %}
+                <p>{{member.user.username}}</p>
+            {% endfor %}
+        </div>
+
+        <div>
+            <h5>Activities</h5>
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}

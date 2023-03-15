@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+
+    {% block title %}Teams{% endblock title %}
+{% block content %}
+
+<style>
+    .teams-container{
+        display: grid;
+        grid-template-columns: 1fr 3fr 1fr;
+    }
+    
+</style>
+
+<div class='teams-container'>
+    <div>
+        <h4><a href="{% url 'create-team' %}">New team</a></h4>
+    </div>
+    <div>
+        <h3>Teams</h3>
+        {% for team in teams %}
+            <p><a href="{% url 'team-dashboard' team.id %}">{{team.name}}</a></p>
+        {% endfor %}
+    </div>
+    <div>
+        
+        <div>
+            <h4>Activities</h4><hr>
+            {% include 'manager/activities.html' %}
+        </div>    
+
+    </div>
+</div>
+
+{% endblock %}

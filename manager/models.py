@@ -47,10 +47,16 @@ class Company(models.Model):
     
 
 class Team(models.Model):
-    name = models.CharField(max_length=200,verbose_name="Teams")
+    name = models.CharField(max_length=200)
     company = models.ForeignKey(Company, on_delete=models.CASCADE, default='')
-    head = models.OneToOneField("Worker", default= "No Head" ,related_name="head",on_delete=models.SET_NULL, null=True, blank=True)
+    head = models.OneToOneField("Worker", default= None ,related_name="head",on_delete=models.SET_NULL, null=True, blank=True)
     workers = models.ManyToManyField("Worker")
+    updated_by = models.ForeignKey(CostumUser, related_name="update_team", on_delete=models.CASCADE, null=True, blank=True)
+
+
+    class Meta:
+        verbose_name = "Team"
+        verbose_name_plural = "Teams"
 
     def __str__(self):
         return self.name

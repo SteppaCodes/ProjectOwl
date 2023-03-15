@@ -197,6 +197,45 @@ def companypage(request,id):
                   }
     return render(request,'manager/company-page.html', context)
 
+def createproject(request):
+
+    if request.user.in_company:
+        form = CompanyProjectForm()
+    else:
+        form = PersonalProjectForm()
+
+    if request.method == "POST":
+        if request.user.in_company:
+            form = CompanyProjectForm(request.POST)
+        else:
+            form = PersonalProjectForm(request.POST)
+        if form.is_valid():
+            project = form.save(commit=False)
+            project.created_by = request.user
+            if request.user.in_company:
+                #retrieving the company key from the session 
+                key = request.session.get('company_key')
+                #Getting the company data and setting the project.company to the current company the user is looged in to
+                company = Company.objects.get(company_key = key)
+                project.company = company
+            else:
+                project.is_personal = True
+                project.created_by = request.user
+                project.save()
+                return redirect("user-dashboard", request.user.id)
+            
+            project.save()
+            
+            #getting the id of each department selected and adding it to the department row of the table
+            for team_id in form.cleaned_data['teams']:
+                team = Team.objects.get(id=team_id.id)
+                project.teams.add(team)
+
+            return redirect("company-page", company.id)
+        
+    context = {"form":form}
+    return render(request,"manager/create-edit.html", context)
+
 def ProjectPage(request, id):
     project = Project.objects.get(id=id)
     milestones = project.milestone_set.all()
@@ -254,45 +293,6 @@ def ProjectPage(request, id):
                      'due_in':due_in,}   
 
     return render(request,'manager/project-page.html', context)
-
-def createproject(request):
-
-    if request.user.in_company:
-        form = CompanyProjectForm()
-    else:
-        form = PersonalProjectForm()
-
-    if request.method == "POST":
-        if request.user.in_company:
-            form = CompanyProjectForm(request.POST)
-        else:
-            form = PersonalProjectForm(request.POST)
-        if form.is_valid():
-            project = form.save(commit=False)
-            project.created_by = request.user
-            if request.user.in_company:
-                #retrieving the company key from the session 
-                key = request.session.get('company_key')
-                #Getting the company data and setting the project.company to the current company the user is looged in to
-                company = Company.objects.get(company_key = key)
-                project.company = company
-            else:
-                project.is_personal = True
-                project.created_by = request.user
-                project.save()
-                return redirect("user-dashboard", request.user.id)
-            
-            project.save()
-            
-            #getting the id of each department selected and adding it to the department row of the table
-            for team_id in form.cleaned_data['teams']:
-                team = Team.objects.get(id=team_id.id)
-                project.teams.add(team)
-
-            return redirect("company-page", company.id)
-        
-    context = {"form":form}
-    return render(request,"manager/create-edit.html", context)
 
 def updateproject(request, id):
     project = Project.objects.get(id=id)
@@ -381,5 +381,76 @@ def deletemilestone(request,id):
     context = {"obj":milestone}
     return render(request,"manager/delete.html", context)
 
+def createteam(request):
+    form = TeamForm()
+    company = request.user.worker.company
 
-       
+    if request.method == "POST":
+        form = TeamForm(request.POST)
+        if form.is_valid():
+            team = form.save(commit=False)
+            team.company = company
+            team.save()
+
+            for worker_id in form.cleaned_data['workers']:
+                worker = Worker.objects.get(id=worker_id.id)
+                team.workers.add(worker)
+
+            return redirect('teams', company.id)
+
+    context = {'form': form}
+    return render(request,'manager/create-edit.html', context)
+
+def teams(request,id):
+    company = Company.objects.get(id=id)
+    teams = company.team_set.all()
+
+    context = {'teams': teams}
+    return render(request,'manager/teams.html', context)
+
+def teamdashboard(request,id):
+    team = Team.objects.get(id=id)
+    members = team.workers.all()
+    projects = Project.objects.filter(company=team.company)
+    team_projects = []
+
+    #getting projects the team is involved in
+    for project in projects:
+        if team in project.teams.all():
+            team_projects.append(project)
+
+    context = {"team":team, "members":members , "projects":team_projects}
+    return render(request, "manager/team-dashboard.html", context)
+
+def updateteam(request, id):
+    team = Team.objects.get(id=id)
+    form = TeamForm(instance=team)
+
+
+    if request.method == "POST":
+        form = TeamForm(request.POST, instance=team)
+        if form.is_valid():
+            team = form.save(commit=False)
+            team.updated_by = request.user
+            team.save()
+
+            team.workers.clear()
+
+            for worker_id in form.cleaned_data['workers']:
+                worker = Worker.objects.get(id=worker_id.id)
+                team.workers.add(worker)
+
+            return redirect('team-dashboard', team.id)
+
+    context = {'form': form}
+    return render(request,'manager/create-edit.html', context)
+
+def deleteteam(request,id):
+    team = Team.objects.get(id=id)
+    company = request.user.worker.company
+    if request.method == "POST":
+        team.delete()
+        return redirect("teams", company.id)
+
+    context = {"obj": team}
+    return render(request,"manager/delete.html", context)
