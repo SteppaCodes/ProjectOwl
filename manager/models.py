@@ -117,6 +117,7 @@ class Activity(models.Model):
     user = models.ForeignKey(CostumUser, on_delete=models.CASCADE,null=True,blank=True)
     project = models.ForeignKey(Project, on_delete=models.SET_NULL, null=True, blank=True)
     milestone = models.ForeignKey(MileStone, on_delete=models.SET_NULL, null=True, blank=True)
+    team = models.ForeignKey(Team, on_delete=models.SET_NULL, null=True,blank=True,default=None)
     task = models.ForeignKey(Task, on_delete=models.SET_NULL, null=True, blank=True)
     message = models.CharField(max_length=2000, default= "New Activity")
     company = models.ForeignKey(Company,null=True,blank=True, on_delete=models.CASCADE)

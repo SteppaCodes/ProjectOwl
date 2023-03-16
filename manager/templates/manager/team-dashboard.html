@@ -33,16 +33,20 @@
     <div>
         <div>
             <h5>Head</h5>
+            {{team.head}}
         </div>
         <div>
             <h5>Co-workers</h5>
             {% for member in members  %}
-                <p>{{member.user.username}}</p>
+                {% if member != team.head %}
+                    <p>{{member.user.username}}</p>
+                {% endif %} 
             {% endfor %}
         </div>
 
         <div>
             <h5>Activities</h5>
+            {% include 'manager/activities.html' %}
         </div>
     </div>
 
