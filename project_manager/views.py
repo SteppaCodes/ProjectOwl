@@ -8,37 +8,47 @@ from django.http import HttpResponse,Http404
 from django.utils import timezone
 from django.conf import settings
 from django.shortcuts import get_object_or_404
-from django.http.response import FileResponse
 
 
-def createproject(request):
+def create_update_project(request, project_id=None):
+    project = None
 
+    if project_id:
+        project = get_object_or_404(Project,id=project_id)
+    
     if request.user.in_company:
-        form = CompanyProjectForm()
+        form = CompanyProjectForm(instance=project)
     else:
-        form = PersonalProjectForm()
+        form = PersonalProjectForm(instance=project)
 
     if request.method == "POST":
         if request.user.in_company:
-            form = CompanyProjectForm(request.POST)
+            form = CompanyProjectForm(request.POST, instance=project)
         else:
-            form = PersonalProjectForm(request.POST)
+            form = PersonalProjectForm(request.POST,instance=project)
         if form.is_valid():
             project = form.save(commit=False)
             project.created_by = request.user
             if request.user.in_company:
                 #retrieving the company key from the session 
                 key = request.session.get('company_key')
-                #Getting the company data and setting the project.company to the current company the user is looged in to
+                #Getting the company data and setting the project.company
+                #to the current company the user is looged in to
                 company = Company.objects.get(company_key = key)
                 project.company = company
+
+                project.save()
+
+                #getting the id of each department selected and adding it to the department row of the table
+                for team_id in form.cleaned_data['teams']:
+                    team = Team.objects.get(id=team_id.id)
+                    project.teams.add(team)     
+                
             else:
                 project.is_personal = True
                 project.created_by = request.user
                 project.save()
                 return redirect("user-dashboard", request.user.id)
-            
-            project.save()
 
             if request.user.in_company:
                 company = request.user.worker.company
@@ -46,18 +56,12 @@ def createproject(request):
                 activity = Activity.objects.create(
                     user=request.user,
                     project=project,
-                    message="created a new project",
+                    message="created a new Project" if not project_id else "updated Project",
                     company=company,
                     name=project.name
                 )
                 activity.save()
-            
-            #getting the id of each department selected and adding it to the department row of the table
-            for team_id in form.cleaned_data['teams']:
-                team = Team.objects.get(id=team_id.id)
-                project.teams.add(team)
-
-            return redirect("company-page", company.id)
+            return redirect("company-page", company.id)   
         
     context = {"form":form}
     return render(request,"manager/create-edit.html", context)
@@ -120,50 +124,6 @@ def ProjectPage(request, id):
 
     return render(request,'project_manager/project-page.html', context)
 
-def updateproject(request, id):
-    project = Project.objects.get(id=id)
-
-    if request.user.in_company:
-        form = CompanyProjectForm(instance=project)
-    else:
-        form = PersonalProjectForm(instance=project)
-    company = project.company
-
-    if request.method == "POST":
-        if request.user.in_company:
-            form = CompanyProjectForm(request.POST,instance=project)
-        else:
-            form = PersonalProjectForm(request.POST,instance=project)
-        if form.is_valid():
-            project = form.save(commit=False)
-            if request.user.in_company:
-                project.company = company
-                project.updated_by = request.user
-                project.save()
-
-                activity = Activity.objects.create(
-                    user=request.user,
-                    project=project,
-                    message= f"updated project -> ",
-                    company=company,
-                    name=project.name
-                )
-                activity.save()
-
-            # Clear existing teams
-                project.teams.clear()
-
-                for team_id in form.cleaned_data['teams']:
-                    team = Team.objects.get(id=team_id.id)
-                    project.teams.add(team)
-            else:
-                project.save()
-            
-            return redirect("project-page", project.id)
-
-    context = {"form":form}
-    return render(request,"manager/create-edit.html", context) 
-
 def deleteproject(request,id):
     project = Project.objects.get(id=id)
     if request.user.in_company:
@@ -186,11 +146,16 @@ def deleteproject(request,id):
     context = {"obj":project}
     return render(request,"manager/delete.html", context)
 
-def createmilestone(request, id):
+def create_update_milestone(request,id,milestone_id=None):
     project = Project.objects.get(id=id)
-    form = MileStoneForm()
+    milestone =None
+
+    if milestone_id:
+        milestone = get_object_or_404(MileStone,id=id)
+
+    form = MileStoneForm(instance=milestone)
     if request.method == "POST":
-        form = MileStoneForm(request.POST)
+        form = MileStoneForm(request.POST,instance=milestone)
         if form.is_valid():
             milestone = form.save(commit=False)
             milestone.project = project
@@ -203,12 +168,11 @@ def createmilestone(request, id):
                 activity = Activity.objects.create(
                     user=request.user,
                     milestone=milestone,
-                    message="created a new milestone",
+                    message="created a new Milestone" if not milestone_id else "updated Milestone",
                     company=company,
                     name=milestone.name
                 )
                 activity.save()
-
             return redirect("project-page", project.id)
 
     context = {"form":form}
@@ -220,29 +184,6 @@ def milestonepage(request, id):
 
     context = {"milestone": milestone , 'tasks':tasks}
     return render(request,"project_manager/milestone-page.html", context)    
-
-def updatemilestone(request, id):
-    milestone = MileStone.objects.get(id=id)
-    form = MileStoneForm(instance=milestone)
-    if request.method == "POST":
-        form = MileStoneForm(request.POST, instance=milestone)
-        if form.is_valid():
-            milestone = form.save(commit=False)
-            milestone.save()
-
-            activity = Activity.objects.create(
-                    user=request.user,
-                    milestone=milestone,
-                    message= "updated milestone -> ",
-                    company=request.user.worker.company,
-                    name=milestone.name
-                )
-            activity.save()
-
-            return redirect("project-page", milestone.project.id)
-
-    context = {"form":form}
-    return render(request,"manager/create-edit.html", context) 
 
 def deletemilestone(request,id):
     milestone = MileStone.objects.get(id=id)
@@ -265,12 +206,15 @@ def deletemilestone(request,id):
     context = {"obj":milestone}
     return render(request,"manager/delete.html", context)
 
-def createtask(request, id):
+def create_update_task(request,id,task_id=None):
     milestone = MileStone.objects.get(id=id)
-    form = TaskForm()
+    task = None
+    if task_id:
+        task = get_object_or_404(Task, id=task_id)
 
+    form = TaskForm(instance=task)
     if request.method == "POST":
-        form = TaskForm(request.POST)
+        form = TaskForm(request.POST,instance=task)
         if form.is_valid():
             task = form.save(commit=False)
             task.milestone = milestone
@@ -283,7 +227,8 @@ def createtask(request, id):
                 activity = Activity.objects.create(
                     user=request.user,
                     task=task,
-                    message="created a new task",
+                    message="created a new Task" 
+                    if not task_id else "updated Task",
                     company=company,
                     name=task.name
                 )
@@ -296,35 +241,6 @@ def createtask(request, id):
 
     context = {"form":form}
     return render(request,"manager/create-edit.html", context)
-
-def updatetask(request, id):
-    task =Task.objects.get(id=id)
-    form = TaskForm(instance=task)
-
-    if request.method == "POST":
-        form = TaskForm(request.POST,instance=task)
-        if form.is_valid():
-            task = form.save(commit=False)
-            task.save()
-
-            activity = Activity.objects.create(
-                    user=request.user,
-                    task=task,
-                    message= "updated task",
-                    name=task.name
-                )
-            activity.save()
-
-            task.workers.clear()
-
-            for worker_id in form.cleaned_data['workers']:
-                worker = Worker.objects.get(id=worker_id.id)
-                task.workers.add(worker)
-
-            return redirect("milestone-page", task.milestone.id)
-
-    context = {"form":form}
-    return render(request,"manager/create-edit.html", context) 
 
 def starttask(request, id):
     task = Task.objects.get(id=id)

@@ -9,6 +9,7 @@ from django.utils import timezone
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 import datetime
+from django.shortcuts import get_object_or_404
 
 
 TODAY = datetime.date.today()
@@ -200,12 +201,16 @@ def companypage(request,id):
                   }
     return render(request,'manager/company-page.html', context)
 
-def createteam(request):
-    form = TeamForm()
+def create_update_team(request, team_id=None):
+    team = None
     company = request.user.worker.company
 
+    if team_id:
+        team = get_object_or_404(Team, id=team_id)
+
+    form = TeamForm(instance=team)
     if request.method == "POST":
-        form = TeamForm(request.POST)
+        form = TeamForm(request.POST,instance=team)
         if form.is_valid():
             team = form.save(commit=False)
             team.company = company
@@ -218,7 +223,8 @@ def createteam(request):
             activity = Activity.objects.create(
                 user=request.user,
                 team=team,
-                message= "Created new team ",
+                message="created a new Team" 
+                    if not team_id else "updated Team",
                 company=request.user.worker.company,
                 name=team.name
                 )
@@ -259,37 +265,6 @@ def teamdashboard(request,id):
               }
     
     return render(request, "manager/team-dashboard.html", context)
-
-def updateteam(request, id):
-    team = Team.objects.get(id=id)
-    form = TeamForm(instance=team)
-
-    if request.method == "POST":
-        form = TeamForm(request.POST, instance=team)
-        if form.is_valid():
-            team = form.save(commit=False)
-            team.updated_by = request.user
-            team.save()
-
-            team.workers.clear()
-
-            for worker_id in form.cleaned_data['workers']:
-                worker = Worker.objects.get(id=worker_id.id)
-                team.workers.add(worker)
-
-            activity = Activity.objects.create(
-                    user=request.user,
-                    team=team,
-                    message= "updated team -> ",
-                    company=request.user.worker.company,
-                    name=team.name
-                )
-            activity.save()
-
-            return redirect('team-dashboard', team.id)
-
-    context = {'form': form}
-    return render(request,'manager/create-edit.html', context)
 
 def deleteteam(request,id):
     team = Team.objects.get(id=id)

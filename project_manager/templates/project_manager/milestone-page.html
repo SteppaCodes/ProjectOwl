@@ -25,7 +25,7 @@
         <div>
             {% for task in tasks %}
                 <h5>{{task.name}}</h5>
-                <small><a href="{% url 'update-task' task.id %}">Edit</a></small>
+                <small><a href="{% url 'update-task' task.milestone.id task.id %}">Edit</a></small>
                 <small><a href="{% url 'delete-task' task.id %}">Delete</a></small><br>
                 <small>Status: {{task.status}}</small><br>
                 <small>Time spent {{task.time_spent}}</small><br>
