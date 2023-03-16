@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+
+    <div>
+        <h5>Pending Review</h5>
+    </div>
+    <div>
+
+    </div>
+    <div>
+        <div>
+            <h5>All Company Files</h5>
+        </div>
+        <div>
+            {% for attachment in attachments %}
+                <p>{{attachment.name}}</p>
+                <small>{{attachment.user.username}}</small>
+                <small>@{{attachment.name}}</small><br>
+                <small><a href="{% url 'update-file' attachment.id %}">Edit</a></small>
+                <small><a href="{% url 'delete-file' attachment.id %}">Delete</a></small>
+            {% endfor %}
+
+        </div>
+    </div>
+{% endblock content %}
+
+

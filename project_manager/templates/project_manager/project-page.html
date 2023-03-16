@@ -41,6 +41,7 @@
             <div>
                 <h3>milestones</h3>
                 <h5><a href="{% url 'create-milestone' project.id %}">New milestone<br></a></h5>
+                <small><a href="{% url 'add_project_attachment' project.id %}">Upload file</a></small>
             </div>
    
             {% for milestone in milestones %}

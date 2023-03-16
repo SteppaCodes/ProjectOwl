@@ -1,0 +1,60 @@
+def createtask(request, id):
+    milestone = MileStone.objects.get(id=id)
+    form = TaskForm()
+
+    if request.method == "POST":
+        form = TaskForm(request.POST)
+        if form.is_valid():
+            task = form.save(commit=False)
+            task.milestone = milestone
+            task.created_by=request.user
+            task.save()
+
+            if request.user.in_company:
+                company = request.user.worker.company
+
+                activity = Activity.objects.create(
+                    user=request.user,
+                    task=task,
+                    message="created a new task",
+                    company=company,
+                    name=task.name
+                )
+                activity.save()
+
+            for worker_id in form.cleaned_data['workers']:
+                worker = Worker.objects.get(id=worker_id.id)
+                task.workers.add(worker)
+            return redirect("milestone-page", milestone.id)
+
+    context = {"form":form}
+    return render(request,"manager/create-edit.html", context)
+
+def updatetask(request, id):
+    task =Task.objects.get(id=id)
+    form = TaskForm(instance=task)
+
+    if request.method == "POST":
+        form = TaskForm(request.POST,instance=task)
+        if form.is_valid():
+            task = form.save(commit=False)
+            task.save()
+
+            activity = Activity.objects.create(
+                    user=request.user,
+                    task=task,
+                    message= "updated task",
+                    name=task.name
+                )
+            activity.save()
+
+            task.workers.clear()
+
+            for worker_id in form.cleaned_data['workers']:
+                worker = Worker.objects.get(id=worker_id.id)
+                task.workers.add(worker)
+
+            return redirect("milestone-page", task.milestone.id)
+
+    context = {"form":form}
+    return render(request,"manager/create-edit.html", context) 
