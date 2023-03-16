@@ -61,17 +61,23 @@ class Task(Info):
     end_time = models.DateTimeField(null=True, blank=True)
     time_spent = models.DurationField(default=timedelta(0))
                                                         
-                                                     
-class Activity(models.Model):
+
+class Data(models.Model):
     name = models.CharField(max_length=200, default =None, null=True,blank=True)
     user = models.ForeignKey(CostumUser, on_delete=models.CASCADE,null=True,blank=True)
     project = models.ForeignKey(Project, on_delete=models.SET_NULL, null=True, blank=True)
     milestone = models.ForeignKey(MileStone, on_delete=models.SET_NULL, null=True, blank=True)
     team = models.ForeignKey(Team, on_delete=models.SET_NULL, null=True,blank=True,default=None)
     task = models.ForeignKey(Task, on_delete=models.SET_NULL, null=True, blank=True)
-    message = models.CharField(max_length=2000, default= "New Activity")
     company = models.ForeignKey(Company,null=True,blank=True, on_delete=models.CASCADE)
+    class Meta:
+        abstract = True
+
+
+class Activity(Data):
+    message = models.CharField(max_length=2000, default= "New Activity")
     created_at = models.DateTimeField(auto_now_add=True)
+
     
     class Meta:
         ordering = ['-created_at']
@@ -82,14 +88,16 @@ class Activity(models.Model):
         return self.message
     
 
-class Attachment(models.Model):
-    name= models.CharField(max_length=100)
-    owner = models.ForeignKey(CostumUser,on_delete=models.SET_NULL,null=True)
+class Attachment(Data):
+
+    STATUS = (
+        ("Awaiting Review", "Awaiting Review"),
+        ("In Review", 'In view'),
+        ("Approved", "Approved"),
+    )
+
     file = models.FileField(upload_to='files')
-    company = models.ForeignKey(Company,null=True,blank=True, on_delete=models.CASCADE)
-    project = models.ForeignKey(Project,on_delete=models.SET_NULL, null=True,blank=True)
-    milestone = models.ForeignKey(MileStone, on_delete=models.SET_NULL, null=True, blank=True)
-    task = models.ForeignKey(Task, on_delete=models.SET_NULL, null=True, blank=True)
+    status = models.CharField(choices=STATUS, default='Awaiting Review',max_length=200)
     updated = models.DateTimeField(auto_now=True)
     created = models.DateTimeField(auto_now_add=True)
 

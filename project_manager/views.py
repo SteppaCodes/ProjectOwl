@@ -1,10 +1,14 @@
 from django.shortcuts import render,redirect
 from .models import *
+import os
 from manager.models import *
 from .forms import *
 from .helpers import *
-from django.http import HttpResponse
+from django.http import HttpResponse,Http404
 from django.utils import timezone
+from django.conf import settings
+from django.shortcuts import get_object_or_404
+from django.http.response import FileResponse
 
 
 def createproject(request):
@@ -114,7 +118,7 @@ def ProjectPage(request, id):
                      "project": project,
                      'due_in':due_in,}   
 
-    return render(request,'manager/project-page.html', context)
+    return render(request,'project_manager/project-page.html', context)
 
 def updateproject(request, id):
     project = Project.objects.get(id=id)
@@ -215,7 +219,7 @@ def milestonepage(request, id):
     tasks = milestone.task_set.all()
 
     context = {"milestone": milestone , 'tasks':tasks}
-    return render(request,"manager/milestone-page.html", context)    
+    return render(request,"project_manager/milestone-page.html", context)    
 
 def updatemilestone(request, id):
     milestone = MileStone.objects.get(id=id)
@@ -386,4 +390,80 @@ def deletetask(request,id):
     context = {"obj": task}
     return render(request,"manager/delete.html", context)
 
+def files(request):
+    company = request.user.worker.company
+    attachments = company.attachment_set.all()
+    print(attachments)
+    context={
+        'attachments':attachments
+    }
+    return render(request, 'project_manager/attachments.html', context)
 
+def addfile(request,project_id=None,milestone_id=None, task_id=None,attachment_id=None):
+    project = None
+    milestone = None
+    task = None
+    attachment = None
+
+    # Retrieve the project/milestone/task/attachment objects based on the parameters in the URL
+    if project_id:
+        project = get_object_or_404(Project, id=project_id)
+    if milestone_id:
+        milestone = get_object_or_404(MileStone, id=milestone_id)
+        project = milestone.project
+    if task_id:
+        task = get_object_or_404(Task, id=task_id)
+        milestone = task.milestone
+        project = milestone.project
+    if attachment_id:
+        attachment = get_object_or_404(Attachment, id=attachment_id)
+        project = attachment.project
+        milestone = attachment.milestone
+        task = attachment.task
+
+    form = AttachmentForm(instance=attachment)
+    if request.method == 'POST':
+        form = AttachmentForm(request.POST,request.FILES, instance=attachment)
+        if form.is_valid():
+            file = form.save(commit=False)
+            file.user = request.user
+            file.company = request.user.worker.company
+            file.project = project
+            file.milestone = milestone
+            file.task = task
+            file.save()
+            return redirect('company-page', request.user.worker.company.id)
+
+    context = {'form':form}
+    return render(request, 'manager/create-edit.html', context)
+
+def fileview(request, id):
+    file = get_object_or_404(Attachment, id=id)
+    file_path = file.file.path
+    file_name, file_extension = os.path.splitext(file_path)
+
+    #Not the best solution but the best i could figure out
+    content_type = ''
+    if file_extension == '.pdf':
+        content_type = 'application/pdf'
+    elif file_extension == '.jpg' or file_extension == '.jpeg':
+        content_type = 'image/jpeg'
+    elif file_extension == '.png':
+        content_type = 'image/png'
+    else:
+        content_type = 'application/octet-stream'
+
+    with open(file_path, 'rb') as f:
+        response = HttpResponse(f.read(), content_type=content_type)
+        response['Content-Disposition'] = 'inline; filename=' + os.path.basename(file_path)
+    return response
+
+def deletefile(request,id):
+    file = Attachment.objects.get(id=id)
+    company = request.user.worker.company
+    if request.method == "POST":
+        file.delete()
+        return redirect("company-page", company.id)
+
+    context = {"obj": file}
+    return render(request,"manager/delete.html", context)
