@@ -1,8 +1,7 @@
 from django.db.models.signals import pre_save, post_save,pre_delete
 from django.dispatch import receiver
-from .models import Project,Worker
+from .models import Worker
 from users.models import CostumUser
-from datetime import datetime, timedelta
 
 
 @receiver(post_save,sender= CostumUser)

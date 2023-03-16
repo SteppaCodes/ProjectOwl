@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Project, MileStone, Team, Worker, Company, Task,Activity
+from .models import Team, Worker, Company
 from users.models import CostumUser
 
 class TeamModelAdmin(admin.ModelAdmin):
@@ -13,10 +13,7 @@ class TeamModelAdmin(admin.ModelAdmin):
         return super().render_change_form(request, context, *args, **kwargs)
 
 
-admin.site.register(Project)
-admin.site.register(MileStone)
+
 admin.site.register(Team, TeamModelAdmin)
 admin.site.register(Worker)
 admin.site.register(Company)
-admin.site.register(Task)
-admin.site.register(Activity)
