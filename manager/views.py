@@ -381,6 +381,19 @@ def createmilestone(request, id):
             milestone.project = project
             milestone.created_by = request.user
             milestone.save()
+
+            if request.user.in_company:
+                company = request.user.worker.company
+
+                activity = Activity.objects.create(
+                    user=request.user,
+                    milestone=milestone,
+                    message="created a new milestone",
+                    company=company,
+                    name=milestone.name
+                )
+                activity.save()
+
             return redirect("project-page", project.id)
 
     context = {"form":form}
@@ -401,6 +414,16 @@ def updatemilestone(request, id):
         if form.is_valid():
             milestone = form.save(commit=False)
             milestone.save()
+
+            activity = Activity.objects.create(
+                    user=request.user,
+                    milestone=milestone,
+                    message= "updated milestone -> ",
+                    company=request.user.worker.company,
+                    name=milestone.name
+                )
+            activity.save()
+
             return redirect("project-page", milestone.project.id)
 
     context = {"form":form}
@@ -408,9 +431,20 @@ def updatemilestone(request, id):
 
 def deletemilestone(request,id):
     milestone = MileStone.objects.get(id=id)
+    company = request.user.worker.company
     
     if request.method == "POST":
         milestone.delete()
+
+        activity = Activity.objects.create(
+                    user=request.user,
+                    milestone=milestone,
+                    message="Deleted milestone",
+                    company=company,
+                    name=milestone.name
+                )
+        activity.save()
+
         return redirect("project-page", milestone.project.id)
 
     context = {"obj":milestone}
@@ -511,6 +545,15 @@ def completetask(request,id):
         task.status = "Completed"
         task.complete = True
         task.save()
+
+        activity = Activity.objects.create(
+                    user=request.user,
+                    task=task,
+                    message= "Completed task",
+                    name=task.name
+                )
+        activity.save()
+
         return redirect('milestone-page', task.milestone.id)
 
 def deletetask(request,id):
@@ -522,7 +565,7 @@ def deletetask(request,id):
                 task=task,
                 message="deleted task",
                 company=company,
-                name= task.name
+                name= task.name,
                 )
         activity.save()
     if request.method == "POST":
@@ -547,6 +590,15 @@ def createteam(request):
                 worker = Worker.objects.get(id=worker_id.id)
                 team.workers.add(worker)
 
+            activity = Activity.objects.create(
+                user=request.user,
+                team=team,
+                message= "Created new team ",
+                company=request.user.worker.company,
+                name=team.name
+                )
+            activity.save()
+
             return redirect('teams', company.id)
 
     context = {'form': form}
@@ -555,14 +607,18 @@ def createteam(request):
 def teams(request,id):
     company = Company.objects.get(id=id)
     teams = company.team_set.all()
+    activities = company.activity_set.all()[:5]
 
-    context = {'teams': teams}
+    context = {'teams': teams,
+               'activities':activities
+               }
     return render(request,'manager/teams.html', context)
 
 def teamdashboard(request,id):
     team = Team.objects.get(id=id)
     members = team.workers.all()
     projects = Project.objects.filter(company=team.company)
+    activities = team.company.activity_set.all()[:5]
     team_projects = []
 
     #getting projects the team is involved in
@@ -573,7 +629,8 @@ def teamdashboard(request,id):
     context = {
                "team":team,
                "members":members ,
-               "projects":team_projects
+               "projects":team_projects,
+               "activities":activities
               }
     
     return render(request, "manager/team-dashboard.html", context)
@@ -581,7 +638,6 @@ def teamdashboard(request,id):
 def updateteam(request, id):
     team = Team.objects.get(id=id)
     form = TeamForm(instance=team)
-
 
     if request.method == "POST":
         form = TeamForm(request.POST, instance=team)
@@ -596,6 +652,15 @@ def updateteam(request, id):
                 worker = Worker.objects.get(id=worker_id.id)
                 team.workers.add(worker)
 
+            activity = Activity.objects.create(
+                    user=request.user,
+                    team=team,
+                    message= "updated team -> ",
+                    company=request.user.worker.company,
+                    name=team.name
+                )
+            activity.save()
+
             return redirect('team-dashboard', team.id)
 
     context = {'form': form}
@@ -607,6 +672,16 @@ def deleteteam(request,id):
     if request.method == "POST":
         team.delete()
         return redirect("teams", company.id)
+    
+    activity = Activity.objects.create(
+            user=request.user,
+            team=team,
+            message= "Deleted team ",
+            company=request.user.worker.company,
+            name=team.name
+                )
+    activity.save()
+
 
     context = {"obj": team}
     return render(request,"manager/delete.html", context)
