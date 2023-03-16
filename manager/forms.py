@@ -7,6 +7,11 @@ class CreateCompanyForm(ModelForm):
         fields= '__all__'
         exclude = ['owner']
 
+class JoinCompanyForm(ModelForm):
+    class Meta:
+        model = Company
+        fields = ['company_key']
+
 class TeamForm(ModelForm):
     class Meta:
         model = Team

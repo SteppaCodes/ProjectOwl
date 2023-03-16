@@ -4,9 +4,9 @@ from django.conf import settings
 from django.conf.urls.static import static
 
 urlpatterns = [
-    path('create-project/', createproject, name='create-project'),
-    path('create-milestone/<str:id>', createmilestone, name='create-milestone'),
-    path('create-task/<str:id>', createtask, name='create-task'),
+    path('create-project/', create_update_project, name='create-project'),
+    path('create-milestone/<str:id>', create_update_milestone, name='create-milestone'),
+    path('create-task/<str:id>', create_update_task, name='create-task'),
     path('milestone/<int:milestone_id>/addfile/',addfile, name='add_milestone_attachment'),
     path('project/<int:project_id>/addfile/',addfile, name='add_project_attachment'),
 
@@ -19,9 +19,9 @@ urlpatterns = [
     path('pause-task/<str:id>', pausetask, name='pause-task'),
     path('completed-task/<str:id>', pausetask, name='completed-task'),
 
-    path('update-project/<str:id>', updateproject,name='update-project'),
-    path('update-milestone/<str:id>', updatemilestone,name='update-milestone'),
-    path('update-task/<str:id>', updatetask,name='update-task'),
+    path('update-project/<str:project_id>', create_update_project,name='update-project'),
+    path('project/<str:id>/update-milestone/<str:milestone_id>', create_update_milestone,name='update-milestone'),
+    path('milestone/<str:id>/update-task/<str:task_id>', create_update_task,name='update-task'),
     path('update-file/<str:attachment_id>', addfile,name='update-file'),
     #path('milestone/<int:milestone_id>/addfile/',addfile, name='add_attachment'),
 

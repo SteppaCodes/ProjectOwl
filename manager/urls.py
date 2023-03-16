@@ -11,14 +11,14 @@ urlpatterns = [
 
     path('join-company',joincompany, name='join-company'),
 
-     path('create-team/', createteam, name='create-team'),
+     path('create-team/', create_update_team, name='create-team'),
 
     path('company/<str:id>', companypage, name='company-page'),
     path('user-dashboard/<str:id>',userdashboard ,name='user-dashboard'),
     path('teams/<str:id>', teams,name='teams'),
     path('team-dashboard/<str:id>',teamdashboard ,name='team-dashboard'),
 
-    path('update-team/<str:id>', updateteam,name='update-team'),
+    path('update-team/<str:team_id>', create_update_team,name='update-team'),
 
     path('delete-team/<str:id>', deleteteam, name='delete-team'),
 
