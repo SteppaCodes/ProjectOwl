@@ -1,4 +1,5 @@
 from django.shortcuts import render,redirect
+from django.urls import reverse
 from .models import *
 import os
 from manager.models import *
@@ -6,7 +7,6 @@ from .forms import *
 from .helpers import *
 from django.http import HttpResponse,Http404
 from django.utils import timezone
-from django.conf import settings
 from django.shortcuts import get_object_or_404
 
 #Work on Notes
@@ -127,7 +127,8 @@ def ProjectPage(request, id):
 
         context =  {"milestones": milestones,
                      "project": project,
-                     'due_in':due_in,}   
+                     'due_in':due_in,
+                     }   
 
     return render(request,'project_manager/project-page.html', context)
 
@@ -244,10 +245,22 @@ def create_update_task(request,id,task_id=None):
             for worker_id in form.cleaned_data['workers']:
                 worker = Worker.objects.get(id=worker_id.id)
                 task.workers.add(worker)
-            return redirect("milestone-page", milestone.id)
+            return redirect("task-page", task.id)
 
     context = {"form":form}
     return render(request,"manager/create-edit.html", context)
+
+def taskpage(request, id):
+    task = Task.objects.get(id=id)
+    notes = task.note_set.all()
+    workers = task.workers.all()
+
+    context ={
+        'task':task,
+        'notes':notes,
+        'workers':workers,
+    }
+    return render(request, 'project_manager/task-page.html', context)
 
 def starttask(request, id):
     task = Task.objects.get(id=id)
@@ -258,7 +271,7 @@ def starttask(request, id):
         task.start_time = NOW
         task.status = "In Progress"
         task.save()
-        return redirect('milestone-page', task.milestone.id)
+        return redirect('task-page', task.id)
 
 def pausetask(request,id):
     task = Task.objects.get(id=id)
@@ -274,7 +287,7 @@ def pausetask(request,id):
                 task.save()
             else:
                 return HttpResponse("milestone is not in progress")
-        return redirect('milestone-page', task.milestone.id)
+        return redirect('task-page', task.id)
 
 def completetask(request,id):
     task = Task.objects.get(id=id)
@@ -292,7 +305,7 @@ def completetask(request,id):
                 )
         activity.save()
 
-        return redirect('milestone-page', task.milestone.id)
+        return redirect('task-page', task.id)
 
 def deletetask(request,id):
     task = Task.objects.get(id=id)
@@ -311,6 +324,36 @@ def deletetask(request,id):
         return redirect("milestone-page", task.milestone.id)
 
     context = {"obj": task}
+    return render(request,"manager/delete.html", context)
+
+def create_update_note(request,id, note_id=None):
+    task = Task.objects.get(id=id)
+    note = None
+
+    if note_id:
+        note = get_object_or_404(Note, id=note_id)
+
+    form = NoteForm(instance=note)
+    if request.method == "POST":
+        form = NoteForm(request.POST,instance=note)
+        if form.is_valid():
+            note = form.save(commit=False)
+            note.author = request.user
+            note.task = task
+            note.save()
+            return redirect('task-page', task.id)
+    
+    context = {'form':form}
+    return render(request,"manager/create-edit.html", context)
+
+def deletenote(request,id):
+    note = Note.objects.get(id=id)
+
+    if request.method == "POST":
+        note.delete()
+        return redirect("task-page", note.id)
+
+    context = {"obj": note}
     return render(request,"manager/delete.html", context)
 
 def files(request):
@@ -390,3 +433,4 @@ def deletefile(request,id):
 
     context = {"obj": file}
     return render(request,"manager/delete.html", context)
+
