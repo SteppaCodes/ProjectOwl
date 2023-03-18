@@ -30,7 +30,6 @@ class Project(Info):
         ('Normal', 'Normal'),
         ('ASAP','ASAP')
     )
-    
 
     company = models.ForeignKey(Company, on_delete=models.CASCADE, default = None, null=True, blank=True)
     progress = models.IntegerField(default=0, null=True, blank=True)
