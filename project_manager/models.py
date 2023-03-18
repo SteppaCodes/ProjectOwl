@@ -25,14 +25,22 @@ class Info(models.Model):
         abstract = True
 
 class Project(Info):
+
+    PRIORITY =(
+        ('Normal', 'Normal'),
+        ('ASAP','ASAP')
+    )
+    
+
     company = models.ForeignKey(Company, on_delete=models.CASCADE, default = None, null=True, blank=True)
     progress = models.IntegerField(default=0, null=True, blank=True)
+    priority_level = models.CharField(max_length=100, choices=PRIORITY, default='Normal')
     teams = models.ManyToManyField(Team, null=True, blank=True)
     deadline = models.DateTimeField(null = True, blank =True)
     is_personal = models.BooleanField(default=False, blank=True, null=True)
     due_in = models.IntegerField(null = True, blank=True, default=None)
     updated_by = models.ForeignKey(CostumUser, related_name="up_dated", on_delete=models.CASCADE, null=True, blank=True)
-    updated_at = models.DateTimeField(auto_now=True,null=True, blank=True)
+
 
     def __str__(self):
         return self.name
@@ -70,6 +78,7 @@ class Data(models.Model):
     team = models.ForeignKey(Team, on_delete=models.SET_NULL, null=True,blank=True,default=None)
     task = models.ForeignKey(Task, on_delete=models.SET_NULL, null=True, blank=True)
     company = models.ForeignKey(Company,null=True,blank=True, on_delete=models.CASCADE)
+
     class Meta:
         abstract = True
 

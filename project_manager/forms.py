@@ -10,13 +10,13 @@ class MileStoneForm(ModelForm):
 class PersonalProjectForm(ModelForm):
     class Meta:
         model = Project
-        fields =   ['name','description','deadline']
+        fields =   ['name','description','deadline', 'priority_level']
        
 class CompanyProjectForm(ModelForm):
 
     class Meta:
         model = Project
-        fields =   ['name','description','deadline', 'teams',]
+        fields =   ['name','description','deadline', 'teams', 'priority_level']
 
 class TaskForm(ModelForm):
     class Meta:

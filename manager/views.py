@@ -176,7 +176,7 @@ def userdashboard(request, id):
 def companypage(request,id):
     company = Company.objects.get(id=id)
     workers = company.worker_set.all()
-    projects = company.project_set.all()
+    projects = company.project_set.all().order_by('-updated', '-created')
     teams = company.team_set.all()
     activities = company.activity_set.all()[:5]
 

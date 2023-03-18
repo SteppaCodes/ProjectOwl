@@ -9,6 +9,7 @@ from django.utils import timezone
 from django.conf import settings
 from django.shortcuts import get_object_or_404
 
+#Work on Notes
 
 def create_update_project(request, project_id=None):
     project = None
@@ -76,6 +77,12 @@ def ProjectPage(request, id):
     if deadline:
         due_in = int((deadline.date() - TODAY).days)
         project.due_in = due_in
+        if project.due_in < 7:
+            project.priority_level = 'ASAP'
+            project.save()
+        else:
+            project.priority_level = 'Normal'
+            project.save()
 
     if request.user.in_company:
         teams = project.teams.all()
