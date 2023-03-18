@@ -25,6 +25,10 @@ Assigning and reassigning of tasks
 
 *Activities tracking
 
+Collaboration on tasks
+
+Notes(maybe a suggestion or update on where you left off or what features you still have to add or anything related to the task basically)and communication between people working on the same task
+
 Meetings
 
 Live Chat
@@ -37,5 +41,6 @@ Notification system
 
 User approval during sign up
 
-![Company Home](https://user-images.githubusercontent.com/105548020/225363143-e61ea87e-3511-43b8-b9e3-d86e0e2a60f0.png)
-Proposed UI design - I designed it btw
+Offline mode
+
+
