@@ -29,8 +29,17 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'users',
     'manager',
-    'project_manager'
+    'project_manager',
+
 ]
+
+    # 'django_cron',
+    # 'django_extensions',
+
+# CRON_CLASSES = [
+#     "project_manager.cron.MyCronJob",
+#     # ...
+# ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',

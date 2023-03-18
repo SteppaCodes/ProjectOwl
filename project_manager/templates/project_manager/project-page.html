@@ -27,6 +27,7 @@
             <p>Status: {{project.status}}</p>
             <p>Created: {{project.created| timesince}} ago</p>
             <p>Progress: {{project.progress}}%</p>
+            <p>level: {{project.priority_level}}</p>
             {% if project.due_in %}
                 <p>Due in : {{project.due_in}} {% if project.due_in > 1 %}days {% else %}day{% endif %}</p>
             {%elif project.due_in == 0%}
