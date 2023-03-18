@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+
+    {% block title %}Teams{% endblock title %}
+{% block content %}
+
+<style>
+    .taskinfo-container{
+        display: grid;
+        grid-template-columns: 1fr 3fr 1fr;
+    }
+    
+</style>
+<h2>{{task.name}}</h2>
+<diV>
+    <diV>
+        <p>Parent:<a href="{% url 'milestone-page' task.milestone.id %}" >{{task.milestone}}</a></p>
+    </div>
+    <diV>
+        <p>Status: {{task.status}}</p>
+    </div>
+    <diV>
+        <p>Time spent: {{task.time_spent}}</p>
+    </div>
+    <diV>
+        <small><a href="{% url 'update-task' task.milestone.id task.id %}" >Edit</a></small>
+        <small><a href="{% url 'delete-task' task.id %}">Delete</a></small><br>
+        <small><a href="{% url 'start-task' task.id %}">start</a></small>
+        <small><a href="{% url 'pause-task' task.id %}">pause</a></small>
+        <small><a href="{% url 'completed-task' task.id %}">complete</a></small>
+    </div>
+    
+</div>
+
+<div class='taskinfo-container'>
+
+    <div>
+        <h5>Workers</h5>
+        <diV>
+            <p><a href="{% url 'update-task' task.milestone.id task.id %}" >Edit</a></p>
+        </div><hr>
+        {% for worker in workers %}
+            <p>{{worker.user.username}}</p>
+        {% endfor %}
+    </div>
+    <div>
+        <h5>Notes</h5>
+        <diV>
+            <p><a href="{% url 'create-note' task.milestone.id %}" >New Note</a></p>
+        </div><hr>
+        {% for note in notes %}
+            <p>{{note.name}}</p>
+            <small>{{note.note}}</small><br>
+            <small><a href="{% url 'update-note' task.milestone.id task.id %}" >Edit</a></small>
+            <small><a href="{% url 'delete-note' note.id %}">Delete</a></small><br>
+        {% endfor %}
+    </div>
+    <div>
+        <h5>Activities</h5><hr>
+        {% include 'manager/activities.html' %}
+        
+    </div>
+       
+</div>
+
+{% endblock %}

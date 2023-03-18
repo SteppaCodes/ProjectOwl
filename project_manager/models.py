@@ -40,7 +40,6 @@ class Project(Info):
     due_in = models.IntegerField(null = True, blank=True, default=None)
     updated_by = models.ForeignKey(CostumUser, related_name="up_dated", on_delete=models.CASCADE, null=True, blank=True)
 
-
     def __str__(self):
         return self.name
 
@@ -67,7 +66,10 @@ class Task(Info):
     pause_time = models.DurationField(null=True, blank=True)
     end_time = models.DateTimeField(null=True, blank=True)
     time_spent = models.DurationField(default=timedelta(0))
-                                                        
+
+    def __str__(self):
+        return self.name
+
 
 class Data(models.Model):
     name = models.CharField(max_length=200, default =None, null=True,blank=True)
@@ -86,7 +88,6 @@ class Activity(Data):
     message = models.CharField(max_length=2000, default= "New Activity")
     created_at = models.DateTimeField(auto_now_add=True)
 
-    
     class Meta:
         ordering = ['-created_at']
         verbose_name = "Activity"
@@ -97,7 +98,6 @@ class Activity(Data):
     
 
 class Attachment(Data):
-
     STATUS = (
         ("Awaiting Review", "Awaiting Review"),
         ("In Review", 'In view'),
@@ -116,3 +116,14 @@ class Attachment(Data):
         ordering = ['-updated']
         verbose_name = "Attachment"
         verbose_name_plural = "Attachments"
+
+class Note(models.Model):
+    name = models.CharField(max_length=200)
+    note = models.TextField()
+    author = models.ForeignKey(CostumUser, on_delete=models.CASCADE,null=True,blank=True)
+    task = models.ForeignKey(Task, on_delete=models.CASCADE, null=True, blank=True)
+    updated = models.DateTimeField(auto_now=True)
+    created = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.name

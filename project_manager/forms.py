@@ -27,3 +27,8 @@ class AttachmentForm(ModelForm):
     class Meta:
         model = Attachment
         fields =['name', 'file']
+
+class NoteForm(ModelForm):
+    class Meta:
+        model = Note
+        fields = ['name','note']
