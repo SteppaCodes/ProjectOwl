@@ -15,7 +15,7 @@ class JoinCompanyForm(ModelForm):
 class TeamForm(ModelForm):
     class Meta:
         model = Team
-        fields = ["name", "head", "workers"]
+        fields = ["name", "head"]
 
 # class RoleForm(ModelForm):
 #     class Meta:

@@ -48,6 +48,7 @@ class MileStone(Info):
     project = models.ForeignKey(Project, on_delete=models.CASCADE)
     value = models.IntegerField(default=0, null=True,blank=True)
     updated_by = models.ForeignKey(CostumUser, related_name="updated", on_delete=models.CASCADE, null=True, blank=True)
+    team = models.ForeignKey(Team, on_delete=models.SET_NULL, null=True,blank=True,default=None)
     updated_at = models.DateTimeField(auto_now=True, null=True, blank=True)
 
     class Meta:
@@ -62,6 +63,7 @@ class MileStone(Info):
 class Task(Info):
     milestone = models.ForeignKey(MileStone,on_delete=models.SET_NULL, null=True,blank=True)
     workers = models.ManyToManyField(Worker)
+    team = models.ForeignKey(Team, on_delete=models.SET_NULL, null=True,blank=True,default=None)
     start_time = models.DateTimeField(null=True, blank=True)
     pause_time = models.DurationField(null=True, blank=True)
     end_time = models.DateTimeField(null=True, blank=True)

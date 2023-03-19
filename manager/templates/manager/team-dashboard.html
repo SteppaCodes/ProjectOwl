@@ -39,7 +39,7 @@
             <h5>Co-workers</h5>
             {% for member in members  %}
                 {% if member != team.head %}
-                    <p>{{member.user.username}}</p>
+                    <small><a href="{% url 'user-dashboard' member.user.id %}">{{member.user.username}}</a></small>
                 {% endif %} 
             {% endfor %}
         </div>
