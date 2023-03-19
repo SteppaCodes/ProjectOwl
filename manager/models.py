@@ -28,7 +28,6 @@ class Team(models.Model):
     name = models.CharField(max_length=200)
     company = models.ForeignKey(Company, on_delete=models.CASCADE, default='')
     head = models.OneToOneField("Worker", default= None ,related_name="head",on_delete=models.SET_NULL, null=True, blank=True)
-    workers = models.ManyToManyField("Worker")
     updated_by = models.ForeignKey(CostumUser, related_name="update_team", on_delete=models.CASCADE, null=True, blank=True)
 
     class Meta:
@@ -41,6 +40,7 @@ class Team(models.Model):
 
 class Worker(models.Model):
     user = models.OneToOneField(CostumUser,on_delete=models.CASCADE,verbose_name="Workers")
+    team = models.ForeignKey(Team, on_delete=models.SET_NULL, null=True,blank=True,default=None)
     company = models.ForeignKey(Company, on_delete=models.CASCADE, null=True,blank=True,default=None)
 
     def __str__(self):

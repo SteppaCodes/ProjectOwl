@@ -4,9 +4,8 @@ from . models import *
 class MileStoneForm(ModelForm):
     class Meta:
         model = MileStone
-        fields = "__all__"
-        exclude = ['created_by', 'status','complete', 'project', 'value']
-
+        fields = ['name', 'description']
+        
 class PersonalProjectForm(ModelForm):
     class Meta:
         model = Project
@@ -22,6 +21,12 @@ class TaskForm(ModelForm):
     class Meta:
         model = Task
         fields =['name', 'workers']
+
+class CollabForm(ModelForm):
+    class Meta:
+        model = Task
+        fields =['workers']
+
 
 class AttachmentForm(ModelForm):
     class Meta:

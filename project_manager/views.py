@@ -9,7 +9,7 @@ from django.http import HttpResponse,Http404
 from django.utils import timezone
 from django.shortcuts import get_object_or_404
 
-#Work on Notes
+#Work on collaboration
 
 def create_update_project(request, project_id=None):
     project = None
@@ -91,7 +91,7 @@ def ProjectPage(request, id):
 
         #Getting Each worker in departments that are working on the project
         for team in teams:
-            for worker in team.workers.all():
+            for worker in team.worker_set.all():
                 if worker not in workers:
                     workers.append(worker)
 
@@ -113,7 +113,8 @@ def ProjectPage(request, id):
                     'count':count,
                     'teams':teams, 
                     "workers":workers,
-                    'due_in':due_in }
+                    'due_in':due_in 
+                    }
     else:
         if count > 0:
             value = 100 / count
@@ -157,9 +158,10 @@ def deleteproject(request,id):
 def create_update_milestone(request,id,milestone_id=None):
     project = Project.objects.get(id=id)
     milestone =None
+    team = request.user.worker.team
 
     if milestone_id:
-        milestone = get_object_or_404(MileStone,id=id)
+        milestone = get_object_or_404(MileStone,id=milestone_id)
 
     form = MileStoneForm(instance=milestone)
     if request.method == "POST":
@@ -168,6 +170,7 @@ def create_update_milestone(request,id,milestone_id=None):
             milestone = form.save(commit=False)
             milestone.project = project
             milestone.created_by = request.user
+            milestone.team = request.user.worker.team
             milestone.save()
 
             if request.user.in_company:
@@ -198,8 +201,7 @@ def deletemilestone(request,id):
     company = request.user.worker.company
     
     if request.method == "POST":
-        milestone.delete()
-
+        
         activity = Activity.objects.create(
                     user=request.user,
                     milestone=milestone,
@@ -208,6 +210,7 @@ def deletemilestone(request,id):
                     name=milestone.name
                 )
         activity.save()
+        milestone.delete()
 
         return redirect("project-page", milestone.project.id)
 
@@ -227,6 +230,7 @@ def create_update_task(request,id,task_id=None):
             task = form.save(commit=False)
             task.milestone = milestone
             task.created_by=request.user
+            task.team = request.user.worker.team
             task.save()
 
             if request.user.in_company:
@@ -242,10 +246,10 @@ def create_update_task(request,id,task_id=None):
                 )
                 activity.save()
 
-            for worker_id in form.cleaned_data['workers']:
-                worker = Worker.objects.get(id=worker_id.id)
-                task.workers.add(worker)
+            task.workers.set(form.cleaned_data['workers'])
+
             return redirect("task-page", task.id)
+    form.fields['workers'].queryset = Worker.objects.filter(team=request.user.worker.team)
 
     context = {"form":form}
     return render(request,"manager/create-edit.html", context)
@@ -261,6 +265,27 @@ def taskpage(request, id):
         'workers':workers,
     }
     return render(request, 'project_manager/task-page.html', context)
+
+def collab(request, id):
+    task = Task.objects.get(id=id)
+    team = request.user.worker.team
+    company = request.user.worker.company
+    print(company)
+
+    form = CollabForm()
+    if request.method == "POST":
+        form = CollabForm(request.POST)
+        if form.is_valid():
+
+            for worker_id in form.cleaned_data['workers']:
+                    worker = Worker.objects.get(id=worker_id.id)
+                    task.workers.add(worker)
+            return redirect('task-page', task.id)
+
+    form.fields['workers'].queryset = Worker.objects.filter(team=team)
+
+    context = {'form':form}
+    return render(request,"manager/create-edit.html", context)
 
 def starttask(request, id):
     task = Task.objects.get(id=id)

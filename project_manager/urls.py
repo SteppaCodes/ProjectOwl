@@ -26,6 +26,9 @@ urlpatterns = [
     path('completed-task/<str:id>', completetask, name='completed-task'),
     path('task/<int:id>/update-Note/<str:note_id>/',create_update_note, name='update-note'),
 
+    #collab
+    path('collab/<int:id>', collab, name='collab'),
+
     #Update
     path('update-project/<str:project_id>', create_update_project,name='update-project'),
     path('project/<str:id>/update-milestone/<str:milestone_id>', create_update_milestone,name='update-milestone'),
