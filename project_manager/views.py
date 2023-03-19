@@ -269,8 +269,6 @@ def taskpage(request, id):
 def collab(request, id):
     task = Task.objects.get(id=id)
     team = request.user.worker.team
-    company = request.user.worker.company
-    print(company)
 
     form = CollabForm()
     if request.method == "POST":
