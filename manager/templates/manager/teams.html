@@ -18,6 +18,8 @@
     <div>
         <h3>Teams</h3>
         {% for team in teams %}
+            <small><a href="{% url 'join-team' team.id %}">Join Team</a></small>
+            <small><a href="{% url 'leave-team' team.id %}">Leave Team</a></small>
             <p><a href="{% url 'team-dashboard' team.id %}">{{team.name}}</a></p>
         {% endfor %}
     </div>

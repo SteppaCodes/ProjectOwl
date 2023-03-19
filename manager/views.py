@@ -241,6 +241,32 @@ def teams(request,id):
                }
     return render(request,'manager/teams.html', context)
 
+def jointeam(request,id):
+    team = Team.objects.get(id=id)
+    team_member = team.worker_set.filter(user=request.user)
+
+    if team_member:
+        return HttpResponse('you are a member of this team')
+    else:
+        worker = Worker.objects.get(user=request.user)
+        worker.team = team
+        worker.save()
+
+    return redirect('teams', team.company.id)
+
+def leaveteam(request,id):
+    team = Team.objects.get(id=id)
+    team_member = team.worker_set.filter(user=request.user)
+
+    if team_member:
+        worker = Worker.objects.get(user=request.user)
+        worker.team = None
+        worker.save()
+    else:
+        return HttpResponse('you are not a member of this team')
+    
+    return redirect('teams', team.company.id)
+
 def teamdashboard(request,id):
     team = Team.objects.get(id=id)
     members = team.worker_set.all()
