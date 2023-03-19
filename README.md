@@ -27,7 +27,9 @@ Assigning and reassigning of tasks
 
 Collaboration on tasks
 
-Notes(maybe a suggestion or update on where you left off or what features you still have to add or anything related to the task basically)and communication between people working on the same task
+*Notes(maybe a suggestion or update on where you left off or what features you still have to add or anything related to the task basically)
+
+communication between people working on the same task
 
 Meetings
 

@@ -19,6 +19,7 @@
     <div>
         <div>
             <h3>{{milestone.name}}</h3>
+            <h3>{{milestone.id}}</h3>
             <small><a href="{% url 'add_milestone_attachment' milestone.id %}">Upload file</a></small>
             <small><a href="{% url 'create-task' milestone.id %}">New Task</a></small>
         </div>

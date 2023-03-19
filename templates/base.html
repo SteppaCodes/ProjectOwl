@@ -12,13 +12,16 @@
 
         <ul style='display: flex ; justify-content : space-between ; list-style-type: none ;padding:20px;'>
 
-            <li>{% if request.user.in_company %}
-                <p><a href="{% url 'company-page' request.user.worker.company.id %}">Home</a></p>
-            {% endif %} </li>
-
-            <li>{% if request.user.in_company %}
-                <p><a href="{% url 'teams' request.user.worker.company.id %}">Teams</a></p>
-            {% endif %} </li>
+            {% if request.user.in_company %}
+                {% if request.user.worker.company.id %}
+                <li>
+                    <p><a href="{% url 'company-page' request.user.worker.company.id %}">Home</a></p>
+                </li>
+                 <li>
+                    <p><a href="{% url 'teams' request.user.worker.company.id %}">Teams</a></p>
+                </li>
+                {% endif %}
+            {% endif %} 
             <li><p><a href='{% url "files" %}'>Files</a></p> </li>
             <li><p><a href='{% url "switch-account" %}'>
                 {% if request.user.in_company %}

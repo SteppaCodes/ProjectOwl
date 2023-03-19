@@ -146,7 +146,7 @@ def userdashboard(request, id):
         if company_key != None:
             company = Company.objects.get(company_key=company_key)
             #distinct() => Makes sure theres only one of each returned value
-            projects = company.project_set.filter(teams__workers__user__username=user.username).distinct()
+            projects = company.project_set.filter(teams__worker__user__username=user.username).distinct()
 
             context = {"user": user,
                         "profile": profile, 
@@ -216,10 +216,6 @@ def create_update_team(request, team_id=None):
             team.company = company
             team.save()
 
-            for worker_id in form.cleaned_data['workers']:
-                worker = Worker.objects.get(id=worker_id.id)
-                team.workers.add(worker)
-
             activity = Activity.objects.create(
                 user=request.user,
                 team=team,
@@ -247,7 +243,7 @@ def teams(request,id):
 
 def teamdashboard(request,id):
     team = Team.objects.get(id=id)
-    members = team.workers.all()
+    members = team.worker_set.all()
     projects = Project.objects.filter(company=team.company)
     activities = team.company.activity_set.all()[:5]
     team_projects = []
