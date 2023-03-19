@@ -9,7 +9,10 @@ urlpatterns = [
     path('logout/', logoutuser, name='logout'),
     path('switch-account/', switchaccount,name='switch-account'),
 
-    path('join-company',joincompany, name='join-company'),
+    path('join-company/',joincompany, name='join-company'),
+    path('join-team/<str:id>',jointeam, name='join-team'),
+
+    path('leave-team/<str:id>',leaveteam, name='leave-team'),
 
      path('create-team/', create_update_team, name='create-team'),
 
